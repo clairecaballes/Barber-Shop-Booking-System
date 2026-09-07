@@ -3,7 +3,23 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Native form controls and scrollbars follow the active theme */
+.dark {
+    color-scheme: dark;
+}
+
+/* FullCalendar surfaces adapt to the dark theme */
+.dark .fc {
+    --fc-page-bg-color: var(--color-slate-900);
+    --fc-border-color: var(--color-slate-700);
+    --fc-neutral-bg-color: var(--color-slate-800);
+    --fc-today-bg-color: color-mix(in oklab, var(--color-amber-500) 12%, transparent);
+    color: var(--color-slate-200);
 }

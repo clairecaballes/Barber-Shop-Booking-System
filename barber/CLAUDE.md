@@ -1,47 +1,83 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# AGENTS.md
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+## Project
 
-## Prerequisites
+Laravel 13 barber shop booking system. PHP 8.3+, SQLite (dev), Vite 8, Tailwind CSS v4, Alpine.js.
 
-Verify that PHP and Composer are available:
+The Laravel app lives entirely in `barber/`. All PHP/artisan commands run from that directory.
 
-```sh
-php -v
-composer -V
-```
-
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
-
-macOS:
+## First-time setup
 
 ```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
+composer setup
+npm install
+npm run build
 ```
 
-Windows PowerShell:
+This installs PHP dependencies, copies `.env`, generates an app key, runs migrations, installs npm, and builds assets.
 
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
+If PHP/Composer are missing, install them via https://php.new.
 
-Linux:
+## Dev server
 
 ```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
+composer dev
 ```
 
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
+Runs `php artisan dev` with Vite HMR (frontend + backend together).
 
-## Agent Setup
+## Seed database
 
-Install Laravel Boost from the application root before making application changes:
+```sh
+php artisan migrate:fresh --seed
+```
+
+Seeds: admin owner account (`owner@barbershop.test` / `password`), default Haircut ₱150/30min service, and business settings.
+
+## Test
+
+```sh
+composer test
+```
+
+Clears config cache, then runs `php artisan test`. Uses in-memory SQLite — no external DB needed.
+
+Run a single test class:
+
+```sh
+php artisan test --filter=BookingTest
+```
+
+## Lint / format
+
+Laravel Pint (PSR-12 defaults, no custom config):
+
+```sh
+./vendor/bin/pint
+```
+
+## Project status
+
+Auth + dashboard are built. Key structure:
+
+- `app/Http/Controllers/Auth/LoginController.php` — login/logout
+- `app/Http/Controllers/DashboardController.php` — dashboard stats
+- `app/Http/Controllers/AccountController.php` — profile/password management
+- `app/Models/` — User, Service, Customer, Booking, BusinessSetting
+- `app/Enums/BookingStatus.php` — pending/booked/completed/cancelled/no_show
+- `app/Services/SalesService.php` — all financial metric queries
+- `app/Support/helpers.php` — `money()` formatter (autoloaded via composer)
+- `routes/web.php` — all routes; auth+guest middleware groups
+
+**Price convention:** all prices stored as integer centavos (₱150 = `15000`). Use `money($cents)` in views.
+
+**Timezone note:** `config/app.php` defaults to UTC. Set `APP_TIMEZONE=Asia/Manila` in production to display correct local times.
+
+## Laravel Boost
+
+`laravel/boost` is not yet installed. If the user requests it:
 
 ```sh
 composer require laravel/boost --dev
 php artisan boost:install
 ```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
