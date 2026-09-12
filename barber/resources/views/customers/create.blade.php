@@ -3,33 +3,31 @@
 
 @section('content')
 <div class="mx-auto max-w-lg">
-    <section class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm">
-        <div class="border-b border-slate-100 dark:border-slate-800 px-6 py-4"><h2 class="text-sm font-semibold text-slate-900 dark:text-white">New Customer</h2></div>
-        <form method="POST" action="{{ route('customers.store') }}" class="space-y-5 px-6 py-5">
+    <x-panel title="New customer" subtitle="Only the name is required — you can fill the rest in later." bodyClass="p-6">
+        <form method="POST" action="{{ route('customers.store') }}" class="space-y-5">
             @csrf
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Name</label>
-                <input type="text" name="name" value="{{ old('name') }}" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                @error('name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Messenger ID</label>
-                <input type="text" name="messenger_id" value="{{ old('messenger_id') }}" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                @error('messenger_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Phone</label>
-                <input type="text" name="phone" value="{{ old('phone') }}" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Notes</label>
-                <textarea name="notes" rows="2" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">{{ old('notes') }}</textarea>
-            </div>
-            <div class="flex justify-end gap-3">
-                <a href="{{ route('customers.index') }}" class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-4 dark:bg-slate-100 dark:text-slate-900 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50">Cancel</a>
-                <button type="submit" class="rounded-lg bg-slate-900 px-4 dark:bg-slate-100 dark:text-slate-900 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 dark:hover:bg-white">Create</button>
+
+            <x-field label="Name" for="name" errorName="name">
+                <x-input id="name" name="name" value="{{ old('name') }}" required autofocus placeholder="e.g. Marco Reyes" />
+            </x-field>
+
+            <x-field label="Messenger ID" for="messenger_id" hint="Used to match conversations to bookings." errorName="messenger_id">
+                <x-input id="messenger_id" name="messenger_id" value="{{ old('messenger_id') }}" />
+            </x-field>
+
+            <x-field label="Phone" for="phone" errorName="phone">
+                <x-input id="phone" name="phone" value="{{ old('phone') }}" />
+            </x-field>
+
+            <x-field label="Notes" for="notes">
+                <x-textarea id="notes" name="notes" rows="2">{{ old('notes') }}</x-textarea>
+            </x-field>
+
+            <div class="flex justify-end gap-2 border-t border-line pt-5">
+                <x-btn variant="ghost" :href="route('customers.index')">Cancel</x-btn>
+                <x-btn variant="accent" type="submit">Create customer</x-btn>
             </div>
         </form>
-    </section>
+    </x-panel>
 </div>
 @endsection

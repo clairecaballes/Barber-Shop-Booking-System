@@ -26,6 +26,29 @@ composer dev
 
 Runs `php artisan dev` with Vite HMR (frontend + backend together).
 
+### Access from another device (phone/tablet)
+
+```sh
+composer dev:lan
+```
+
+Serves the app on `http://0.0.0.0:8000`. On the other device (same Wi-Fi) open
+`http://<PC-LAN-IP>:8000` and sign in with the registered email — all shop data
+lives server-side (SQLite + database sessions), so every device sees the same
+bookings/customers. `composer dev` stays bound to localhost only.
+
+## Security (OWASP)
+
+- Global `SecurityHeaders` middleware emits CSP + `X-Frame-Options`/`nosniff`/
+  `Referrer-Policy`/`Permissions-Policy` on every response. Alpine needs
+  `'unsafe-eval'`; the local Vite HMR origin is allowlisted only in `local` env.
+- Login is rate-limited per `email|IP` (`RateLimiter::for('login')`, 5/min, set
+  in `AppServiceProvider`). Password-reset routes are throttled too.
+- Session cookies: `http_only`, `same_site=lax` (see `.env`). Enable
+  `SESSION_SECURE_COOKIE=true` only when serving over HTTPS.
+- Changing the password rotates the session id + CSRF token and signs out every
+  other device (`AccountController`).
+
 ## Seed database
 
 ```sh
@@ -56,11 +79,24 @@ Laravel Pint (PSR-12 defaults, no custom config):
 ./vendor/bin/pint
 ```
 
+## Design system
+
+Dark charcoal base + electric lime accent, bento surfaces, chrome materials. Defined in `resources/css/app.css`.
+
+- **Tokens:** semantic vars (`--page`, `--surface`, `--stroke`, `--ink`, `--muted`, `--accent`, `--radius-bento`) set on `:root` and overridden in `.dark`, exposed to Tailwind via `@theme inline`. Use `bg-page`, `bg-surface`, `text-ink`, `text-muted`, `border-line`, `text-accent`, `bg-accent-soft`, `rounded-tile` — never raw `slate-*`/`amber-*`.
+- **Component classes:** `.bento` (panel), `.bento-sunken` (recessed well), `.bento-lit` (lime hairline + bloom), `.chrome` (dark metal rail/topbar), `.btn-accent`/`.btn-metal`/`.btn-ghost`/`.btn-danger`, `.field`, `.label`, `.chip`, `.rail-*`, `.view-tab`, `.numeral` (tabular mono for money/counts/times), `.pole`/`.pole-cap` (CSS barber pole; `.pole-anim` rotates it, login page only).
+- **Accent budget:** lime is for active nav, primary CTAs, lit tiles, and status dots — keep it roughly 10% of the paint. Most surfaces stay neutral.
+- **Light theme:** still available via the toggle; it uses a deeper lime (`#4d7c0f`) for contrast on white. The rail/topbar stay dark chrome in both themes and keep the true lime.
+- **Status colors:** `--st-pending|booked|completed|cancelled|noshow|blocked`, mirrored as event fills in `CalendarController`/`Api\CalendarEventsController` (dark ink text on every fill).
+- **Blade primitives:** `x-panel`, `x-btn`, `x-field`, `x-input`, `x-select`, `x-textarea`, `x-alert`, `x-stat-card`, `x-status-badge`, `x-icon`.
+
 ## Project status
 
 Full feature set built. Key structure:
 
 - `app/Http/Controllers/Auth/LoginController.php` — login/logout
+- `app/Http/Controllers/Auth/PasswordResetController.php` — forgot-password: 6-digit one-time code mailed to a matching Gmail (OWASP: generic responses, hashed expiring tokens, throttled routes, sessions wiped on reset)
+- `app/Mail/PasswordResetCode.php` — reset-code email (SMTP via `.env` Gmail app password; codes also fall back to `storage/logs` only if the mailer fails)
 - `app/Http/Controllers/DashboardController.php` — dashboard stats
 - `app/Http/Controllers/AccountController.php` — profile/password management
 - `app/Http/Controllers/CalendarController.php` — FullCalendar page

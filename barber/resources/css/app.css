@@ -8,18 +8,667 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+    --radius-tile: 1rem; /* 16px */
+    --radius-bento: 1.25rem; /* 20px */
+    --radius-slab: 1.5rem; /* 24px */
 }
 
-/* Native form controls and scrollbars follow the active theme */
+/* ---------------------------------------------------------------------------
+   Palette
+
+   The canonical finish is the dark shop: charcoal panels, hairline white
+   strokes, and electric lime held to a small slice of the screen. The light
+   theme is a daylight counterpart for desk work, using a deeper lime that
+   still clears contrast on white.
+--------------------------------------------------------------------------- */
+
+:root {
+    --page: #f4f4f5;
+    --rail: #ffffff;
+    --surface: #ffffff;
+    --surface-hi: #ffffff;
+    --surface-sunken: #f4f4f5;
+    --stroke: rgba(24, 24, 27, 0.08);
+    --stroke-strong: rgba(24, 24, 27, 0.16);
+    --ink: #18181b;
+    --muted: #71717a;
+    --accent: #4d7c0f;
+    --accent-hi: #65a30d;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(77, 124, 15, 0.1);
+    --accent-line: rgba(77, 124, 15, 0.4);
+    --accent-glow: rgba(77, 124, 15, 0.28);
+    --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.06);
+    --shadow-lg: 0 18px 40px -26px rgba(24, 24, 27, 0.4);
+    --inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --step-shadow: rgba(24, 24, 27, 0.2);
+    --step-glow: rgba(24, 24, 27, 0.38);
+
+    /* The rail and topbar are dark milled metal in either theme, so they keep
+       their own inks and the true lime indicator light. */
+    --rail-ink: #f4f4f5;
+    --rail-muted: #8b8b93;
+    --rail-stroke: rgba(255, 255, 255, 0.08);
+    --rail-accent: #ccff00;
+    --rail-accent-hi: #dcff5c;
+    --rail-accent-ink: #121212;
+    --rail-accent-soft: rgba(204, 255, 0, 0.12);
+    --rail-accent-line: rgba(204, 255, 0, 0.38);
+    --rail-accent-glow: rgba(204, 255, 0, 0.22);
+
+    /* Booking statuses, tuned for a white surface. */
+    --st-pending: #b45309;
+    --st-booked: #1d4ed8;
+    --st-completed: #4d7c0f;
+    --st-cancelled: #b91c1c;
+    --st-noshow: #c2410c;
+    --st-blocked: #52525b;
+}
+
 .dark {
     color-scheme: dark;
+
+    --page: #121212;
+    --rail: #18181b;
+    --surface: #1e1e1e;
+    --surface-hi: #26262a;
+    --surface-sunken: #141416;
+    --stroke: rgba(255, 255, 255, 0.08);
+    --stroke-strong: rgba(255, 255, 255, 0.16);
+    --ink: #f4f4f5;
+    --muted: #a1a1aa;
+    --accent: #ccff00;
+    --accent-hi: #a3e635;
+    --accent-ink: #121212;
+    --accent-soft: rgba(204, 255, 0, 0.12);
+    --accent-line: rgba(204, 255, 0, 0.38);
+    --accent-glow: rgba(204, 255, 0, 0.22);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 26px 60px -30px rgba(0, 0, 0, 0.95);
+    --inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --step-shadow: rgba(0, 0, 0, 0.65);
+    --step-glow: rgba(0, 0, 0, 0.9);
+
+    /* Booking statuses, tuned for charcoal. */
+    --st-pending: #f0b429;
+    --st-booked: #60a5fa;
+    --st-completed: #ccff00;
+    --st-cancelled: #f87171;
+    --st-noshow: #fb923c;
+    --st-blocked: #71717a;
 }
 
-/* FullCalendar surfaces adapt to the dark theme */
-.dark .fc {
-    --fc-page-bg-color: var(--color-slate-900);
-    --fc-border-color: var(--color-slate-700);
-    --fc-neutral-bg-color: var(--color-slate-800);
-    --fc-today-bg-color: color-mix(in oklab, var(--color-amber-500) 12%, transparent);
-    color: var(--color-slate-200);
+@theme inline {
+    --color-page: var(--page);
+    --color-rail: var(--rail);
+    --color-surface: var(--surface);
+    --color-sunken: var(--surface-sunken);
+    --color-line: var(--stroke);
+    --color-line-strong: var(--stroke-strong);
+    --color-ink: var(--ink);
+    --color-muted: var(--muted);
+    --color-accent: var(--accent);
+    --color-accent-hi: var(--accent-hi);
+    --color-accent-ink: var(--accent-ink);
+    --color-accent-soft: var(--accent-soft);
+
+    --color-rail-ink: var(--rail-ink);
+    --color-rail-muted: var(--rail-muted);
+    --color-rail-accent: var(--rail-accent);
+}
+
+@layer base {
+    html {
+        background-color: var(--page);
+    }
+
+    body {
+        background-color: var(--page);
+        color: var(--ink);
+    }
+
+    ::selection {
+        background-color: var(--accent);
+        color: var(--accent-ink);
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    /* Narrow, recessed scrollbars to match the sunken surfaces. */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--stroke-strong) transparent;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: var(--stroke-strong);
+        border: 3px solid transparent;
+        border-radius: 999px;
+        background-clip: content-box;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@layer components {
+    /* --- Surfaces ---------------------------------------------------------
+       A bento tile: one hairline stroke, a soft top-lit gradient, a deep
+       dropped shadow, and a faint inner highlight so the panel reads as a
+       milled slab rather than a flat rectangle.
+    ---------------------------------------------------------------------- */
+    .bento {
+        position: relative;
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius-bento);
+        background-image: linear-gradient(180deg, var(--surface-hi) 0%, var(--surface) 42%);
+        box-shadow: var(--shadow-lg), var(--inner-glow);
+    }
+
+    .bento-sunken {
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius-tile);
+        background-color: var(--surface-sunken);
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(0, 0, 0, 0.12);
+    }
+
+    .bento-hover {
+        transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .bento-hover:hover {
+        border-color: var(--accent-line);
+        box-shadow: var(--shadow-lg), var(--inner-glow), 0 0 0 1px var(--accent-soft);
+    }
+
+    /* A tile that carries the accent: lime hairline plus a lime bloom under
+       the bottom edge. Reserve for the one number that matters on a screen. */
+    .bento-lit {
+        border-color: var(--accent-line);
+        box-shadow: var(--shadow-lg), var(--inner-glow), 0 18px 45px -32px var(--accent-glow);
+    }
+
+    /* Raised tiles: the card gets visible physical thickness (a crisp step
+       under the base) plus a deep dropped light, so the whole screen reads
+       layered rather than flat. Composes over the base .bento shadow. */
+    .bento-raised {
+        box-shadow:
+            var(--inner-glow),
+            0 1px 2px rgba(0, 0, 0, 0.08),
+            0 4px 0 -1px var(--step-shadow),
+            0 7px 0 -2px color-mix(in oklab, var(--step-shadow) 55%, transparent),
+            0 28px 56px -24px var(--step-glow);
+    }
+
+    .bento-raised.bento-lit {
+        box-shadow:
+            var(--inner-glow),
+            0 1px 2px rgba(0, 0, 0, 0.08),
+            0 4px 0 -1px var(--step-shadow),
+            0 7px 0 -2px color-mix(in oklab, var(--step-shadow) 55%, transparent),
+            0 30px 60px -24px var(--accent-glow),
+            0 0 52px -30px var(--accent-glow);
+    }
+
+    /* A soft accent wash pooling in the panel's top corner. Layers over the
+       base bento gradient so cards keep their milled look with a warm lime
+       tint instead of reading as flat charcoal. */
+    .bento-wash {
+        background-image:
+            radial-gradient(140% 100% at 100% 0%, var(--accent-soft), transparent 55%),
+            linear-gradient(180deg, var(--surface-hi) 0%, var(--surface) 42%);
+    }
+
+    /* Lift: hover pops the tile off the desk and lets the accent glow catch
+       the underside. */
+    .bento-lift {
+        transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .bento-lift:hover {
+        transform: translateY(-3px);
+        border-color: var(--accent-line);
+        box-shadow:
+            var(--inner-glow),
+            0 1px 2px rgba(0, 0, 0, 0.08),
+            0 7px 0 -1px var(--step-shadow),
+            0 26px 52px -22px var(--step-glow);
+    }
+
+    .bento-lift.bento-lit:hover {
+        box-shadow:
+            var(--inner-glow),
+            0 1px 2px rgba(0, 0, 0, 0.08),
+            0 7px 0 -1px var(--step-shadow),
+            0 26px 56px -22px var(--accent-glow);
+    }
+
+    /* An accent hairline fires along the top edge of a neutral tile. */
+    .bento-accent-edge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 7%;
+        right: 7%;
+        height: 3px;
+        border-radius: 999px;
+        background-image: linear-gradient(90deg, transparent, var(--accent) 50%, transparent);
+        opacity: 0.65;
+        pointer-events: none;
+    }
+
+    /* --- Chrome -----------------------------------------------------------
+       Polished metal: a lit top edge, a dark floor, and a glossy sheen. Used
+       for the rail, the topbar, and segmented controls.
+    ---------------------------------------------------------------------- */
+    .chrome {
+        background-image: linear-gradient(180deg, #26262a 0%, #1a1a1d 55%, #161618 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 1px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    .chrome-sheen {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .chrome-sheen::after {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 45%;
+        background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent);
+        pointer-events: none;
+    }
+
+    /* --- Controls -------------------------------------------------------- */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: 0.75rem;
+        padding: 0.5rem 0.95rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.25rem;
+        white-space: nowrap;
+        transition: filter 140ms ease, border-color 140ms ease, background-color 140ms ease;
+    }
+
+    .btn:disabled {
+        opacity: 0.55;
+        pointer-events: none;
+    }
+
+    /* Polished lime: bright crown, darker skirt, hairline highlight. */
+    .btn-accent {
+        color: var(--accent-ink);
+        background-image: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 48%, color-mix(in oklab, var(--accent) 78%, black) 100%);
+        border: 1px solid color-mix(in oklab, var(--accent) 65%, black);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 10px 24px -14px var(--accent-glow);
+    }
+
+    .btn-accent:hover {
+        filter: brightness(1.06);
+    }
+
+    /* Brushed metal: for secondary actions that still deserve presence. */
+    .btn-metal {
+        color: var(--ink);
+        border: 1px solid var(--stroke-strong);
+        background-image: linear-gradient(180deg, var(--surface-hi) 0%, var(--surface) 100%);
+        box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .btn-metal:hover {
+        border-color: var(--accent-line);
+        color: var(--ink);
+    }
+
+    .btn-ghost {
+        color: var(--muted);
+        border: 1px solid transparent;
+    }
+
+    .btn-ghost:hover {
+        color: var(--ink);
+        background-color: var(--accent-soft);
+    }
+
+    .btn-danger {
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.35);
+        background-color: rgba(248, 113, 113, 0.08);
+    }
+
+    .btn-danger:hover {
+        background-color: rgba(248, 113, 113, 0.16);
+    }
+
+    /* Recessed inputs, lit lime on focus. */
+    .field {
+        display: block;
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid var(--stroke);
+        background-color: var(--surface-sunken);
+        color: var(--ink);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.35rem;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
+        transition: border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .field::placeholder {
+        color: var(--muted);
+    }
+
+    .field:focus {
+        border-color: var(--accent-line);
+        outline: none;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25), 0 0 0 3px var(--accent-soft);
+    }
+
+    .field:disabled {
+        opacity: 0.55;
+    }
+
+    /* Native pickers need a dark glyph on dark surfaces. */
+    .dark input[type='date'],
+    .dark input[type='time'],
+    .dark input[type='month'] {
+        color-scheme: dark;
+    }
+
+    .label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--muted);
+    }
+
+    .checkbox {
+        accent-color: var(--accent);
+    }
+
+    .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        border-radius: 999px;
+        border: 1px solid var(--stroke);
+        background-color: rgba(255, 255, 255, 0.02);
+        padding: 0.125rem 0.6rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+    }
+
+    /* --- Rail navigation --------------------------------------------------
+       The menu is a metal rail with a hairline copper-free path running down
+       it; the active item is a lit node on that path.
+    ---------------------------------------------------------------------- */
+    .rail-path {
+        position: relative;
+    }
+
+    .rail-path::before {
+        content: '';
+        position: absolute;
+        left: 1.375rem;
+        top: 0.25rem;
+        bottom: 0.25rem;
+        width: 1px;
+        background-image: linear-gradient(180deg, transparent, var(--rail-stroke) 12%, var(--rail-stroke) 88%, transparent);
+        pointer-events: none;
+    }
+
+    .rail-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-radius: 0.75rem;
+        padding: 0.55rem 0.75rem 0.55rem 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--rail-muted);
+        transition: color 140ms ease, background-color 140ms ease;
+    }
+
+    .rail-item:hover {
+        color: var(--rail-ink);
+        background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    .rail-node {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        height: 1.75rem;
+        width: 1.75rem;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.6rem;
+        border: 1px solid var(--rail-stroke);
+        background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent);
+        color: inherit;
+        transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+    }
+
+    .rail-item-active {
+        color: var(--rail-ink);
+        background-image: linear-gradient(90deg, var(--rail-accent-soft), transparent 85%);
+    }
+
+    .rail-item-active .rail-node {
+        color: var(--rail-accent-ink);
+        border-color: var(--rail-accent-line);
+        background-image: linear-gradient(180deg, var(--rail-accent-hi), var(--rail-accent));
+        box-shadow: 0 0 0 4px var(--rail-accent-soft), 0 8px 20px -10px var(--rail-accent-glow);
+    }
+
+    /* Segmented view switcher on chrome. */
+    .view-tab {
+        border-radius: 0.55rem;
+        padding: 0.35rem 0.7rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--rail-muted);
+        transition: color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .view-tab:hover {
+        color: var(--rail-ink);
+    }
+
+    /* Lit by brightness rather than by lime, so the accent stays on the CTAs. */
+    .view-tab.is-active {
+        color: var(--rail-ink);
+        background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    /* --- Gauges -----------------------------------------------------------
+       Data tiles are read, not just counted: recessed tracks for period
+       meters and vertical bars for the seven-day takings chart. Fills are
+       mixed from the ink token, so one rule covers both themes; only the
+       current day's bar is allowed to carry the accent.
+    ---------------------------------------------------------------------- */
+    .meter {
+        height: 0.3rem;
+        border-radius: 999px;
+        background-color: var(--surface-sunken);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+    }
+
+    .meter-fill {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background-image: linear-gradient(90deg, var(--accent-hi), var(--accent));
+        box-shadow: 0 0 14px -4px var(--accent-glow);
+    }
+
+    .bar {
+        border-radius: 0.4rem 0.4rem 0.15rem 0.15rem;
+        background-image: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 24px -14px var(--accent-glow);
+        transition: filter 160ms ease, transform 160ms ease;
+    }
+
+    .bar:hover {
+        filter: brightness(1.15);
+        transform: translateY(-2px);
+    }
+
+    .bar-today {
+        background-image: linear-gradient(180deg, var(--accent-hi), color-mix(in oklab, var(--accent) 78%, black));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 14px 30px -12px var(--accent-glow), 0 0 0 1px var(--accent-line);
+    }
+
+    /* --- Numerals ---------------------------------------------------------
+       Money, counts, and times line up in columns.
+    ---------------------------------------------------------------------- */
+    .numeral {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.02em;
+    }
+
+    /* --- Barber pole ------------------------------------------------------
+       The one skeuomorphic showpiece: a chrome-capped cylinder of diagonal
+       stripes behind curved glass. Rendered at whatever height it is given.
+    ---------------------------------------------------------------------- */
+    .pole {
+        position: relative;
+        display: block;
+        border-radius: 999px;
+        background-color: #e9e9ea;
+        background-image: repeating-linear-gradient(
+            -38deg,
+            var(--accent) 0 12%,
+            #f4f4f5 12% 24%,
+            #1e1e1e 24% 36%,
+            #f4f4f5 36% 48%
+        );
+        background-size: 100% 220%;
+        box-shadow:
+            inset -12px 0 18px -10px rgba(0, 0, 0, 0.75),
+            inset 12px 0 18px -12px rgba(0, 0, 0, 0.55),
+            0 14px 30px -14px rgba(0, 0, 0, 0.85);
+    }
+
+    /* The stripe travel is reserved for the sign-in pole, so the rail mark and
+       every other page stay still. */
+    .pole-anim {
+        animation: pole-spin 14s linear infinite;
+    }
+
+    /* Curved glass in front of the stripes. */
+    .pole::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background-image: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.65) 22%,
+            rgba(255, 255, 255, 0.12) 42%,
+            rgba(0, 0, 0, 0.25) 78%,
+            rgba(0, 0, 0, 0.45) 100%
+        );
+    }
+
+    /* Chrome end caps. */
+    .pole-cap {
+        border-radius: 999px;
+        background-image: linear-gradient(180deg, #4a4a50 0%, #26262a 45%, #101012 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 16px -8px rgba(0, 0, 0, 0.9);
+    }
+
+    @keyframes pole-spin {
+        to {
+            background-position: 0 220%;
+        }
+    }
+
+    /* --- Calendar --------------------------------------------------------- */
+    .fc {
+        --fc-border-color: var(--stroke);
+        --fc-page-bg-color: transparent;
+        --fc-neutral-bg-color: var(--surface-sunken);
+        --fc-today-bg-color: var(--accent-soft);
+        --fc-now-indicator-color: var(--accent);
+        font-size: 0.8125rem;
+        color: var(--ink);
+    }
+
+    .fc .fc-toolbar-title,
+    .fc .fc-col-header-cell-cushion {
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    .fc .fc-col-header-cell-cushion,
+    .fc .fc-daygrid-day-number {
+        color: var(--muted);
+        padding: 0.5rem;
+    }
+
+    .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+        color: var(--accent-ink);
+        background-color: var(--accent);
+        border-radius: 999px;
+        padding: 0.15rem 0.5rem;
+    }
+
+    .fc .fc-daygrid-event,
+    .fc .fc-timegrid-event {
+        border-radius: 0.5rem;
+        border: 0;
+        padding: 1px 4px;
+        font-weight: 600;
+    }
+
+    .fc .fc-day-other {
+        opacity: 0.45;
+    }
+
+    .fc .fc-scrollgrid {
+        border-radius: var(--radius-tile);
+        overflow: hidden;
+    }
+
+    /* Pagination picks up the same strokes and lit active state. */
+    nav[role='navigation'] span[aria-current='page'] > span,
+    nav[role='navigation'] a {
+        border-radius: 0.6rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pole-anim {
+        animation: none;
+    }
+
+    .bento-hover,
+    .bar {
+        transition: none;
+    }
 }

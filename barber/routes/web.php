@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\BlockedSlotController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BusinessSettingsController;
@@ -17,8 +18,17 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
     Route::post('login', [LoginController::class, 'store'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:login')
         ->name('login.attempt');
+
+    Route::get('forgot-password', [PasswordResetController::class, 'create'])->name('password.request');
+    Route::post('forgot-password', [PasswordResetController::class, 'sendCode'])
+        ->middleware('throttle:5,10')
+        ->name('password.email');
+    Route::get('reset-password', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    Route::post('reset-password', [PasswordResetController::class, 'reset'])
+        ->middleware('throttle:10,10')
+        ->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {
@@ -53,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::get('sales', [SalesController::class, 'index'])->name('sales.index');
 
     // Expenses
+    Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
     Route::resource('expenses', ExpenseController::class)->only(['store', 'update', 'destroy']);
 
     // Settings

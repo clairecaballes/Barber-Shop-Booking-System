@@ -3,64 +3,82 @@
 
 @section('content')
 <div class="mx-auto max-w-lg" x-data="editBooking()" x-init="init()">
-    <section class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm">
-        <div class="border-b border-slate-100 dark:border-slate-800 px-6 py-4">
-            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Edit Booking #{{ $booking->id }}</h2>
-        </div>
-        <form method="POST" action="{{ route('bookings.update', $booking) }}" class="space-y-5 px-6 py-5">
-            @csrf @method('PATCH')
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Customer</label>
-                <select name="customer_id" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
+    <x-panel title="Edit booking #{{ $booking->id }}" subtitle="Moving the slot re-checks the chair for overlaps." bodyClass="p-6">
+        <form method="POST" action="{{ route('bookings.update', $booking) }}" class="space-y-5">
+            @csrf
+            @method('PATCH')
+
+            <x-field label="Customer" for="customer_id">
+                <x-select id="customer_id" name="customer_id" required>
                     @foreach ($customers as $c)
-                        <option value="{{ $c->id }}" {{ old('customer_id', $booking->customer_id) == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                        <option value="{{ $c->id }}" @selected(old('customer_id', $booking->customer_id) == $c->id)>{{ $c->name }}</option>
                     @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Service</label>
-                <select name="service_id" required x-model="selectedService" @change="loadSlots()" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
+                </x-select>
+            </x-field>
+
+            <x-field label="Service" for="service_id">
+                <x-select id="service_id" name="service_id" required x-model="selectedService" @change="loadSlots()">
                     @foreach ($services as $s)
-                        <option value="{{ $s->id }}" {{ old('service_id', $booking->service_id) == $s->id ? 'selected' : '' }}>{{ $s->name }} — {{ money($s->price) }} ({{ $s->duration }}min)</option>
+                        <option value="{{ $s->id }}" @selected(old('service_id', $booking->service_id) == $s->id)>
+                            {{ $s->name }} — {{ money($s->price) }} ({{ $s->duration }} min)
+                        </option>
                     @endforeach
-                </select>
+                </x-select>
+            </x-field>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+                <x-field label="Date" for="appointment_date">
+                    <x-input id="appointment_date" type="date" name="appointment_date" required
+                             x-model="selectedDate" @change="loadSlots()"
+                             value="{{ old('appointment_date', $booking->appointment_date->toDateString()) }}" />
+                </x-field>
+
+                <x-field label="Time" for="appointment_time" hint="Slots come from the shop's open hours.">
+                    <x-select id="appointment_time" name="appointment_time" required x-model="selectedTime">
+                        <template x-for="slot in availableSlots" :key="slot">
+                            <option :value="slot" x-text="formatTime(slot)"></option>
+                        </template>
+                    </x-select>
+                </x-field>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Date</label>
-                <input type="date" name="appointment_date" x-model="selectedDate" @change="loadSlots()" required value="{{ old('appointment_date', $booking->appointment_date->toDateString()) }}" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Time</label>
-                <select name="appointment_time" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                    <template x-for="slot in availableSlots" :key="slot">
-                        <option :value="slot" x-text="formatTime(slot)" :selected="slot === '{{ old('appointment_time', $booking->appointment_time) }}'"></option>
-                    </template>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Notes</label>
-                <textarea name="notes" rows="2" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">{{ old('notes', $booking->notes) }}</textarea>
-            </div>
-            <div class="flex justify-end gap-3">
-                <a href="{{ route('bookings.index') }}" class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-4 dark:bg-slate-100 dark:text-slate-900 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50">Cancel</a>
-                <button type="submit" class="rounded-lg bg-slate-900 px-4 dark:bg-slate-100 dark:text-slate-900 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 dark:hover:bg-white">Update</button>
+
+            <x-field label="Notes" for="notes" errorName="notes">
+                <x-textarea id="notes" name="notes" rows="2">{{ old('notes', $booking->notes) }}</x-textarea>
+            </x-field>
+
+            <div class="flex justify-end gap-2 border-t border-line pt-5">
+                <x-btn variant="ghost" :href="route('bookings.index')">Cancel</x-btn>
+                <x-btn variant="accent" type="submit">Save changes</x-btn>
             </div>
         </form>
-    </section>
+    </x-panel>
 </div>
 
+@push('scripts')
 <script>
 function editBooking() {
     return {
         selectedDate: '{{ old("appointment_date", $booking->appointment_date->toDateString()) }}',
         selectedService: '{{ old("service_id", $booking->service_id) }}',
+        selectedTime: '{{ old("appointment_time", $booking->appointment_time) }}'.slice(0, 5),
         availableSlots: [],
         async init() { await this.loadSlots(); },
         async loadSlots() {
             if (!this.selectedDate || !this.selectedService) return;
             const res = await fetch(`/api/availability?date=${this.selectedDate}&service_id=${this.selectedService}`);
             const data = await res.json();
-            this.availableSlots = data.slots || [];
+            let slots = (data.slots || []).map(s => String(s).slice(0, 5));
+
+            // Keep the booking's own current time in the list so saving without
+            // touching the slot keeps the original time instead of silently jumping.
+            if (this.selectedTime && !slots.includes(this.selectedTime)) {
+                slots.unshift(this.selectedTime);
+            }
+
+            this.availableSlots = slots;
+            if (!slots.includes(this.selectedTime)) {
+                this.selectedTime = slots[0] || '';
+            }
         },
         formatTime(time) {
             if (!time) return '';
@@ -70,4 +88,5 @@ function editBooking() {
     };
 }
 </script>
+@endpush
 @endsection

@@ -3,36 +3,34 @@
 
 @section('content')
 <div class="mx-auto max-w-lg">
-    <section class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm">
-        <div class="border-b border-slate-100 dark:border-slate-800 px-6 py-4">
-            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">New Service</h2>
-        </div>
-        <form method="POST" action="{{ route('services.store') }}" class="space-y-5 px-6 py-5">
+    <x-panel title="New service" subtitle="Duration sets how long the slot is held on the calendar." bodyClass="p-6">
+        <form method="POST" action="{{ route('services.store') }}" class="space-y-5">
             @csrf
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Name</label>
-                <input type="text" name="name" value="{{ old('name') }}" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                @error('name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+
+            <x-field label="Name" for="name" errorName="name">
+                <x-input id="name" name="name" value="{{ old('name') }}" required autofocus placeholder="e.g. Skin fade" />
+            </x-field>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+                <x-field label="Price (₱)" for="price" errorName="price">
+                    <x-input id="price" type="number" name="price" value="{{ old('price', 150) }}" min="0" step="1" required />
+                </x-field>
+
+                <x-field label="Duration (minutes)" for="duration" errorName="duration">
+                    <x-input id="duration" type="number" name="duration" value="{{ old('duration', 30) }}" min="15" max="240" step="15" required />
+                </x-field>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Price (₱)</label>
-                <input type="number" name="price" value="{{ old('price', 150) }}" min="0" step="1" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                @error('price') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Duration (minutes)</label>
-                <input type="number" name="duration" value="{{ old('duration', 30) }}" min="15" max="240" step="15" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                @error('duration') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-            </div>
-            <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                <input type="checkbox" name="active" value="1" {{ old('active', '1') ? 'checked' : '' }} class="h-4 w-4 rounded border-slate-300 text-amber-500 dark:border-slate-600 dark:bg-slate-900 focus:ring-amber-300">
-                Active
+
+            <label class="flex items-center gap-2.5 text-sm text-ink">
+                <input type="checkbox" name="active" value="1" class="checkbox h-4 w-4 rounded border-line" @checked(old('active', '1'))>
+                Bookable straight away
             </label>
-            <div class="flex justify-end gap-3">
-                <a href="{{ route('services.index') }}" class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-4 dark:bg-slate-100 dark:text-slate-900 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50">Cancel</a>
-                <button type="submit" class="rounded-lg bg-slate-900 px-4 dark:bg-slate-100 dark:text-slate-900 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 dark:hover:bg-white">Create</button>
+
+            <div class="flex justify-end gap-2 border-t border-line pt-5">
+                <x-btn variant="ghost" :href="route('services.index')">Cancel</x-btn>
+                <x-btn variant="accent" type="submit">Create service</x-btn>
             </div>
         </form>
-    </section>
+    </x-panel>
 </div>
 @endsection

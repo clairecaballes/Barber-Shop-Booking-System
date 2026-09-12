@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -55,6 +56,15 @@ class AccountController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return back()->with('status', 'Password updated.');
+        // OWASP: a password change revokes every other device's session and
+        // rotates the current session id + CSRF token (fixation / replay).
+        DB::table('sessions')
+            ->where('user_id', $user->id)
+            ->where('id', '!=', $request->session()->getId())
+            ->delete();
+
+        $request->session()->regenerate();
+
+        return back()->with('status', 'Password updated. Other signed-in devices were signed out.');
     }
 }

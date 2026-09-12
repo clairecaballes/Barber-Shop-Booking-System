@@ -91,6 +91,42 @@ class SalesService
     }
 
     /**
+     * Completed-sales totals per day across a date range, oldest first.
+     * Days without takings are included with a zero value.
+     *
+     * @return array<int, array{date: string, label: string, value: int}>
+     */
+    public function salesByDay(Carbon $start, Carbon $end): array
+    {
+        $totals = Booking::query()
+            ->completed()
+            ->whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
+            ->selectRaw('appointment_date, SUM(price) as total')
+            ->groupBy('appointment_date')
+            ->get()
+            ->mapWithKeys(fn ($row) => [
+                Carbon::parse($row->appointment_date)->toDateString() => (int) $row->total,
+            ]);
+
+        $days = [];
+        $current = $start->copy()->startOfDay();
+
+        while ($current->lte($end)) {
+            $key = $current->toDateString();
+
+            $days[] = [
+                'date' => $key,
+                'label' => $current->format('D'),
+                'value' => $totals[$key] ?? 0,
+            ];
+
+            $current->addDay();
+        }
+
+        return $days;
+    }
+
+    /**
      * Average daily sales (completed sales / days with at least one completed booking).
      */
     public function averageDailySales(): int

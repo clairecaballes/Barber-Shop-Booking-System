@@ -2,40 +2,62 @@
 @section('title', 'Services')
 
 @section('content')
-<div class="mx-auto max-w-3xl space-y-6">
+<div class="mx-auto max-w-4xl space-y-6">
 
     @if (session('status'))
-        <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-400">{{ session('status') }}</div>
+        <x-alert>{{ session('status') }}</x-alert>
     @endif
 
-    <div class="flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-slate-900 dark:text-white">All Services</h2>
-        <a href="{{ route('services.create') }}" class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-600">+ Add Service</a>
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h2 class="text-sm font-semibold text-ink">Menu of services</h2>
+            <p class="text-xs text-muted">Prices and durations drive the booking slots.</p>
+        </div>
+        <x-btn variant="accent" :href="route('services.create')">
+            <x-icon name="plus" class="h-4 w-4" />
+            Add service
+        </x-btn>
     </div>
 
     <div class="space-y-3">
         @forelse ($services as $service)
-            <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-5 py-4 shadow-sm">
-                <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2">
-                        <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $service->name }}</p>
-                        @unless ($service->active)
-                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 dark:bg-slate-800 dark:text-slate-400">Inactive</span>
-                        @endunless
+            <div class="bento bento-hover flex flex-wrap items-center justify-between gap-4 rounded-tile px-5 py-4">
+                <div class="flex min-w-0 items-center gap-3">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.65rem] border border-line text-muted"
+                          style="background-image: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);">
+                        <x-icon name="scissors" class="h-4 w-4" />
+                    </span>
+                    <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <p class="truncate text-sm font-semibold text-ink">{{ $service->name }}</p>
+                            @unless ($service->active)
+                                <span class="chip text-muted">Hidden</span>
+                            @endunless
+                        </div>
+                        <p class="numeral mt-0.5 text-xs text-muted">{{ $service->duration }} min in the chair</p>
                     </div>
-                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ $service->duration }} minutes</p>
                 </div>
+
                 <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-amber-600">{{ money($service->price) }}</span>
-                    <a href="{{ route('services.edit', $service) }}" class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">Edit</a>
+                    <span class="numeral text-sm font-semibold text-ink">{{ money($service->price) }}</span>
+                    <x-btn variant="metal" :href="route('services.edit', $service)" class="px-3 py-1.5 text-xs">Edit</x-btn>
                     <form method="POST" action="{{ route('services.destroy', $service) }}" onsubmit="return confirm('Delete this service?')">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="text-xs text-red-500 hover:text-red-700">Delete</button>
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" aria-label="Delete {{ $service->name }}"
+                                class="flex h-8 w-8 items-center justify-center rounded-[0.65rem] text-muted transition-colors hover:bg-red-500/10 hover:text-red-500">
+                            <x-icon name="trash" class="h-4 w-4" />
+                        </button>
                     </form>
                 </div>
             </div>
         @empty
-            <p class="py-8 text-center text-sm text-slate-400">No services yet.</p>
+            <x-panel bodyClass="p-10 text-center">
+                <p class="text-sm text-muted">No services yet — add what you actually cut.</p>
+                <div class="mt-4 flex justify-center">
+                    <x-btn variant="accent" :href="route('services.create')">Add a service</x-btn>
+                </div>
+            </x-panel>
         @endforelse
     </div>
 </div>

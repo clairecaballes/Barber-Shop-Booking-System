@@ -29,12 +29,14 @@ class CalendarEventsController extends Controller
             ->whereBetween('appointment_date', [$startDate, $endDate])
             ->get()
             ->map(function (Booking $booking) {
+                // Fills match the UI status dots; all carry dark ink so they read
+                // as painted labels on the charcoal board.
                 $statusColors = [
-                    BookingStatus::Pending->value => '#eab308',
-                    BookingStatus::Booked->value => '#3b82f6',
-                    BookingStatus::Completed->value => '#22c55e',
-                    BookingStatus::Cancelled->value => '#ef4444',
-                    BookingStatus::NoShow->value => '#f97316',
+                    BookingStatus::Pending->value => '#f0b429',
+                    BookingStatus::Booked->value => '#60a5fa',
+                    BookingStatus::Completed->value => '#ccff00',
+                    BookingStatus::Cancelled->value => '#f87171',
+                    BookingStatus::NoShow->value => '#fb923c',
                 ];
 
                 return [
@@ -44,13 +46,18 @@ class CalendarEventsController extends Controller
                     'end' => Carbon::parse($booking->appointment_date->toDateString().' '.$booking->appointment_time)
                         ->addMinutes($booking->service->duration)
                         ->toDateTimeString(),
-                    'color' => $statusColors[$booking->status->value] ?? '#6b7280',
+                    'color' => $statusColors[$booking->status->value] ?? '#71717a',
+                    'textColor' => '#141416',
                     'extendedProps' => [
                         'customerName' => $booking->customer->name ?? 'Walk-in',
                         'serviceName' => $booking->service->name,
+                        'serviceId' => $booking->service_id,
+                        'duration' => $booking->service->duration,
                         'price' => $booking->price,
                         'status' => $booking->status->value,
                         'notes' => $booking->notes,
+                        'appointmentDate' => $booking->appointment_date->toDateString(),
+                        'appointmentTime' => $booking->appointment_time,
                     ],
                 ];
             });
@@ -63,8 +70,8 @@ class CalendarEventsController extends Controller
                 'title' => $blocked->reason ?: 'Barber on leave',
                 'start' => $blocked->date->toDateString(),
                 'allDay' => true,
-                'color' => '#64748b',
-                'textColor' => '#ffffff',
+                'color' => '#3f3f46',
+                'textColor' => '#f4f4f5',
                 'extendedProps' => [
                     'blocked' => true,
                     'reason' => $blocked->reason,

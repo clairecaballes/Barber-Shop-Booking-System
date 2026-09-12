@@ -5,56 +5,76 @@
 <div class="mx-auto max-w-lg" x-data="quickBooking()" x-init="init()">
 
     @if (session('status'))
-        <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-400">{{ session('status') }}</div>
+        <div class="mb-4"><x-alert>{{ session('status') }}</x-alert></div>
     @endif
 
-    <section class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm">
-        <div class="border-b border-slate-100 dark:border-slate-800 px-6 py-4">
-            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Quick Booking</h2>
-            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Fast entry for Messenger conversations.</p>
+    {{-- Success confirmation shown after an in-page save. --}}
+    <div x-show="submitted" x-cloak class="mb-4">
+        <x-alert>Booking added to the calendar. The slot is locked, the customer is on the chair.</x-alert>
+        <div class="mt-3 flex justify-end gap-2">
+            <x-btn variant="ghost" type="button" @click="bookAnother">Book another</x-btn>
+            <x-btn variant="accent" :href="route('calendar.index')">View calendar</x-btn>
         </div>
-        <form method="POST" action="{{ route('quick-bookings.store') }}" class="space-y-5 px-6 py-5">
+    </div>
+
+    {{-- Inline error from the AJAX save. --}}
+    <div x-show="submitError" x-cloak class="mb-4">
+        <x-alert tone="danger"><span x-text="submitError"></span></x-alert>
+    </div>
+
+    <x-panel title="Walk-in booking" subtitle="For Messenger and counter requests — two taps and it's on the chair." bodyClass="p-6">
+        <form method="POST" action="{{ route('quick-bookings.store') }}" class="space-y-5" x-ref="form"
+              x-show="!submitted" @submit.prevent="submitQuick($event)">
             @csrf
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Customer</label>
-                <select name="customer_id" x-model="customerId" @change="selectedCustomerChange" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                    <option value="">Select existing customer...</option>
+
+            <x-field label="Existing customer" for="customer_id" errorName="customer_id">
+                <x-select id="customer_id" name="customer_id" x-model="customerId" @change="selectedCustomerChange">
+                    <option value="">None — this is a new customer</option>
                     @foreach ($customers as $c)
-                        <option value="{{ $c->id }}" {{ old('customer_id') == $c->id ? 'selected' : '' }}>{{ $c->name }} {{ $c->messenger_id ? '💬' : '' }}</option>
+                        <option value="{{ $c->id }}" @selected(old('customer_id') == $c->id)>
+                            {{ $c->name }}{{ $c->messenger_id ? ' · Messenger' : '' }}
+                        </option>
                     @endforeach
-                </select>
-                @error('customer_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </x-select>
+            </x-field>
+
+            <x-field label="New customer name" for="customer_name" hint="Leave blank if you picked someone above." errorName="customer_name">
+                <x-input id="customer_name" name="customer_name" x-model="customerName" ::disabled="customerId"
+                         placeholder="e.g. Marco Reyes" value="{{ old('customer_name') }}" />
+            </x-field>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+                <x-field label="Date" for="appointment_date">
+                    <x-input id="appointment_date" type="date" name="appointment_date" required
+                             x-model="selectedDate" @change="loadSlots()"
+                             min="{{ now()->toDateString() }}" value="{{ old('appointment_date') }}" />
+                </x-field>
+
+                <x-field label="Service" for="service_id">
+                    <x-select id="service_id" name="service_id" required x-model="selectedService" @change="loadSlots()">
+                        @foreach ($services as $s)
+                            <option value="{{ $s->id }}" @selected(old('service_id', request('service_id', $s->id)) == $s->id)>
+                                {{ $s->name }} — {{ money($s->price) }} ({{ $s->duration }} min)
+                            </option>
+                        @endforeach
+                    </x-select>
+                </x-field>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Or new customer name</label>
-                <input type="text" name="customer_name" x-model="customerName" :disabled="customerId" placeholder="Type a new customer name" value="{{ old('customer_name') }}" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200 disabled:bg-slate-50 disabled:text-slate-400 dark:disabled:bg-slate-800 dark:disabled:text-slate-500 dark:text-slate-400">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Date</label>
-                <input type="date" name="appointment_date" x-model="selectedDate" @change="loadSlots()" min="{{ now()->toDateString() }}" required value="{{ old('appointment_date') }}" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Service</label>
-                <select name="service_id" required x-model="selectedService" @change="loadSlots()" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                    @foreach ($services as $s)
-                        <option value="{{ $s->id }}" {{ old('service_id', request('service_id', $s->id)) == $s->id ? 'selected' : '' }}>{{ $s->name }} — {{ money($s->price) }} ({{ $s->duration }}min)</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Time</label>
-                <input type="time" name="appointment_time" x-model="bookTime" required min="00:01" value="{{ old('appointment_time') }}" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                <p class="mt-1 text-xs text-slate-400">Pick a time; overlapping bookings are rejected.</p>
-                @error('appointment_time') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-            </div>
-            <div class="flex justify-end gap-3">
-                <a href="{{ route('bookings.index') }}" class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50">Cancel</a>
-                <button type="submit" class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-600">Book Now</button>
+
+            <x-field label="Time" for="appointment_time" hint="Overlapping bookings are rejected." errorName="appointment_time">
+                <x-input id="appointment_time" type="time" name="appointment_time" required
+                         x-model="bookTime" min="00:01" value="{{ old('appointment_time') }}" />
+            </x-field>
+
+            <div class="flex justify-end gap-2 border-t border-line pt-5">
+                <x-btn variant="ghost" :href="route('bookings.index')">Cancel</x-btn>
+                <x-btn variant="accent" type="submit">Book it</x-btn>
             </div>
         </form>
-    </section>
+    </x-panel>
 </div>
 
+@push('scripts')
 <script>
 function quickBooking() {
     return {
@@ -65,9 +85,43 @@ function quickBooking() {
         customerId: '{{ old("customer_id") }}',
         customerName: '{{ old("customer_name") }}',
         bookTime: '{{ old("appointment_time") }}',
+        submitted: false,
+        submitError: '',
         init() { this.loadSlots(); },
         selectedCustomerChange() {
             if (this.customerId) this.customerName = '';
+        },
+        async submitQuick(event) {
+            this.submitError = '';
+            const form = event.target;
+            try {
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    body: new FormData(form),
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    this.submitError = data.message
+                        ?? (data.errors ? Object.values(data.errors).flat().join(' ') : 'Could not create this booking. Check the time and try again.');
+                    return;
+                }
+
+                this.submitted = true;
+            } catch (e) {
+                this.submitError = 'Something went wrong. Please try again.';
+            }
+        },
+        bookAnother() {
+            this.submitted = false;
+            this.submitError = '';
+            if (this.$refs.form) this.$refs.form.reset();
+            this.customerId = '';
+            this.customerName = '';
+            this.selectedDate = new Date().toISOString().split('T')[0];
+            this.loadSlots();
         },
         async loadSlots() {
             if (!this.selectedDate || !this.selectedService) return;
@@ -76,7 +130,7 @@ function quickBooking() {
                 const res = await fetch(`/api/availability?date=${this.selectedDate}&service_id=${this.selectedService}`);
                 const data = await res.json();
                 this.availableSlots = data.slots || [];
-            } catch(e) { this.availableSlots = []; }
+            } catch (e) { this.availableSlots = []; }
             this.loadingSlots = false;
         },
         formatTime(time) {
@@ -88,4 +142,5 @@ function quickBooking() {
     };
 }
 </script>
+@endpush
 @endsection

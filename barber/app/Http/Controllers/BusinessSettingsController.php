@@ -33,14 +33,17 @@ class BusinessSettingsController extends Controller
         $data = $request->validate([
             'shop_name' => ['required', 'string', 'max:255'],
             'currency' => ['required', 'string', 'max:10'],
-            'operating_hours' => ['required', 'array'],
+            'operating_hours' => ['sometimes', 'array'],
             'operating_hours.*.open' => ['nullable', 'date_format:H:i'],
             'operating_hours.*.close' => ['nullable', 'date_format:H:i'],
         ]);
 
         BusinessSetting::updateOrCreate(['key' => 'shop_name'], ['value' => $data['shop_name']]);
         BusinessSetting::updateOrCreate(['key' => 'currency'], ['value' => $data['currency']]);
-        BusinessSetting::updateOrCreate(['key' => 'operating_hours'], ['value' => $data['operating_hours']]);
+
+        if ($request->has('operating_hours')) {
+            BusinessSetting::updateOrCreate(['key' => 'operating_hours'], ['value' => $data['operating_hours']]);
+        }
 
         return back()->with('status', 'Business settings updated.');
     }

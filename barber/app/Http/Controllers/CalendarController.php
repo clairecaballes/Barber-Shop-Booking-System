@@ -29,12 +29,14 @@ class CalendarController extends Controller
             ->whereBetween('appointment_date', [$start, $end])
             ->get()
             ->map(function (Booking $booking) {
+                // Fills match the UI status dots; all carry dark ink so they read
+                // as painted labels on the charcoal board.
                 $statusColors = [
-                    BookingStatus::Pending->value => '#eab308',
-                    BookingStatus::Booked->value => '#3b82f6',
-                    BookingStatus::Completed->value => '#22c55e',
-                    BookingStatus::Cancelled->value => '#ef4444',
-                    BookingStatus::NoShow->value => '#f97316',
+                    BookingStatus::Pending->value => '#f0b429',
+                    BookingStatus::Booked->value => '#60a5fa',
+                    BookingStatus::Completed->value => '#ccff00',
+                    BookingStatus::Cancelled->value => '#f87171',
+                    BookingStatus::NoShow->value => '#fb923c',
                 ];
 
                 return [
@@ -44,7 +46,8 @@ class CalendarController extends Controller
                     'end' => Carbon::parse($booking->appointment_date->toDateString().' '.$booking->appointment_time)
                         ->addMinutes($booking->service->duration)
                         ->toDateTimeString(),
-                    'color' => $statusColors[$booking->status->value] ?? '#6b7280',
+                    'color' => $statusColors[$booking->status->value] ?? '#71717a',
+                    'textColor' => '#141416',
                     'extendedProps' => [
                         'customerName' => $booking->customer->name ?? 'Walk-in',
                         'serviceName' => $booking->service->name,

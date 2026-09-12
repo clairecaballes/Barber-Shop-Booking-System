@@ -84,12 +84,12 @@ class ExpenseTest extends TestCase
             'expense_date' => now()->subYear()->toDateString(),
         ]);
 
-        $this->get(route('sales.index', ['expense_period' => 'weekly']))
+        $this->get(route('expenses.index', ['period' => 'weekly']))
             ->assertOk()
             ->assertSee('Clipper oil')
             ->assertDontSee('Last year rent');
 
-        $this->get(route('sales.index', ['expense_period' => 'yearly']))
+        $this->get(route('expenses.index', ['period' => 'yearly']))
             ->assertOk()
             ->assertSee('Clipper oil')
             ->assertDontSee('Last year rent');
@@ -104,7 +104,7 @@ class ExpenseTest extends TestCase
             'expense_date' => now()->toDateString(),
         ]);
 
-        $this->get(route('sales.index', ['expense_period' => 'bogus']))
+        $this->get(route('expenses.index', ['period' => 'bogus']))
             ->assertOk()
             ->assertSee('<option value="monthly" selected', false);
     }

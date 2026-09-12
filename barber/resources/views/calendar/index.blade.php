@@ -3,112 +3,217 @@
 
 @section('content')
 <div x-data="calendarApp()" x-init="init()">
-    {{-- Success toast --}}
-    <div x-show="toast" x-transition.opacity.duration.300ms x-cloak class="fixed left-1/2 top-4 z-[60] -translate-x-1/2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg" style="display:none;">
+
+    @if (session('status'))
+        <div class="mb-4"><x-alert>{{ session('status') }}</x-alert></div>
+    @endif
+
+    {{-- Toast --}}
+    <div x-show="toast" x-transition.opacity.duration.300ms x-cloak
+         class="fixed left-1/2 top-4 z-[60] -translate-x-1/2 rounded-[0.75rem] px-5 py-3 text-sm font-semibold shadow-lg"
+         style="display:none; background-color: var(--accent); color: var(--accent-ink);">
         <span x-text="toast"></span>
     </div>
 
-    {{-- Header --}}
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    {{-- Controls --}}
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
-            <button @click="calendar.prev()" class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                &larr; Prev
+            <button @click="calendar.prev()" aria-label="Previous period"
+                    class="chrome flex h-9 w-9 items-center justify-center rounded-[0.65rem] border border-white/10 text-rail-muted transition-colors hover:text-rail-ink">
+                <x-icon name="chevron-left" class="h-4 w-4" />
             </button>
-            <h2 x-text="calendarTitle" class="text-lg font-semibold text-slate-900 dark:text-white"></h2>
-            <button @click="calendar.next()" class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                Next &rarr;
+
+            <h2 x-text="calendarTitle" class="min-w-[10rem] px-1 text-center text-sm font-semibold text-ink sm:text-base"></h2>
+
+            <button @click="calendar.next()" aria-label="Next period"
+                    class="chrome flex h-9 w-9 items-center justify-center rounded-[0.65rem] border border-white/10 text-rail-muted transition-colors hover:text-rail-ink">
+                <x-icon name="chevron-right" class="h-4 w-4" />
             </button>
-            <button @click="calendar.today()" class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                Today
-            </button>
+
+            <x-btn variant="ghost" @click="calendar.today()" class="ml-1">Today</x-btn>
         </div>
+
         <div class="flex items-center gap-2">
-            <button @click="changeView('dayGridMonth')" :class="currentView === 'dayGridMonth' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 dark:text-white' : 'bg-white text-slate-700 dark:text-slate-200 dark:bg-slate-900 dark:text-slate-200'" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50">Month</button>
-            <button @click="changeView('timeGridWeek')" :class="currentView === 'timeGridWeek' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 dark:text-white' : 'bg-white text-slate-700 dark:text-slate-200 dark:bg-slate-900 dark:text-slate-200'" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50">Week</button>
-            <button @click="changeView('timeGridDay')" :class="currentView === 'timeGridDay' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 dark:text-white' : 'bg-white text-slate-700 dark:text-slate-200 dark:bg-slate-900 dark:text-slate-200'" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50">Day</button>
-            <button @click="downloadCalendar()" class="ml-2 flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0 0l-4-4m4 4l4-4"/></svg>
-                Download
-            </button>
+            <div class="chrome flex items-center gap-1 rounded-[0.75rem] border border-white/10 p-1">
+                @foreach (['dayGridMonth' => 'Month', 'timeGridWeek' => 'Week', 'timeGridDay' => 'Day'] as $view => $label)
+                    <button @click="changeView('{{ $view }}')"
+                            :class="currentView === '{{ $view }}' ? 'is-active' : ''"
+                            class="view-tab">{{ $label }}</button>
+                @endforeach
+            </div>
+
+            <x-btn variant="accent" @click="downloadCalendar()">
+                <x-icon name="download" class="h-4 w-4" />
+                Export
+            </x-btn>
         </div>
     </div>
 
-    {{-- Legend --}}
-    <div class="mb-4 flex flex-wrap gap-4 text-xs text-slate-600 dark:text-slate-300">
-        <span class="flex items-center gap-1"><span class="h-3 w-3 rounded-full bg-yellow-500"></span> Pending</span>
-        <span class="flex items-center gap-1"><span class="h-3 w-3 rounded-full bg-blue-500"></span> Booked</span>
-        <span class="flex items-center gap-1"><span class="h-3 w-3 rounded-full bg-green-500"></span> Completed</span>
-        <span class="flex items-center gap-1"><span class="h-3 w-3 rounded-full bg-red-500"></span> Cancelled</span>
-        <span class="flex items-center gap-1"><span class="h-3 w-3 rounded-full bg-orange-500"></span> No-show</span>
+    {{-- Day key --}}
+    <div class="mb-4 flex flex-wrap items-center gap-4 text-xs text-muted">
+        @foreach (['pending' => 'Pending', 'booked' => 'Booked', 'completed' => 'Completed', 'cancelled' => 'Cancelled', 'no_show' => 'No-shows'] as $key => $label)
+            <span class="flex items-center gap-1.5">
+                <span class="h-2 w-2 rounded-full" style="background-color: var(--st-{{ $key === 'no_show' ? 'noshow' : $key }});"></span>
+                {{ $label }}
+            </span>
+        @endforeach
+        <span class="flex items-center gap-1.5">
+            <span class="h-2 w-2 rounded-full" style="background-color: var(--st-blocked);"></span>
+            Blocked
+        </span>
     </div>
 
-    {{-- Calendar container --}}
-    <div id="calendar-wrapper" class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-4 shadow-sm">
-        <div id="calendar"></div>
-    </div>
+    {{-- Board --}}
+    <x-panel bodyClass="p-4">
+        <div id="calendar-wrapper">
+            <div id="calendar"></div>
+        </div>
+    </x-panel>
 
-    {{-- Booking detail modal --}}
-    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm" style="display:none;">
-        <div @click.outside="showModal = false" class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
-            <h3 class="text-lg font-semibold text-slate-900 dark:text-white" x-text="selectedBooking?.title"></h3>
-            <div class="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-300">
-                <p><span class="font-medium text-slate-900 dark:text-white">Customer:</span> <span x-text="selectedBooking?.extendedProps?.customerName"></span></p>
-                <p><span class="font-medium text-slate-900 dark:text-white">Service:</span> <span x-text="selectedBooking?.extendedProps?.serviceName"></span></p>
-                <p><span class="font-medium text-slate-900 dark:text-white">Status:</span> <span x-text="selectedBooking?.extendedProps?.status"></span></p>
-                <p><span class="font-medium text-slate-900 dark:text-white">Price:</span> <span x-text="formatMoney(selectedBooking?.extendedProps?.price)"></span></p>
+    {{-- Booking detail --}}
+    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="showModal = false"></div>
+
+        <div class="bento relative w-full max-w-md p-6">
+            <div class="flex items-start justify-between gap-4">
+                <h3 class="text-base font-semibold text-ink" x-text="selectedBooking?.title"></h3>
+                <button type="button" @click="showModal = false" aria-label="Close booking details"
+                        class="flex h-8 w-8 items-center justify-center rounded-[0.65rem] border border-line text-muted transition-colors hover:border-accent-line hover:text-ink">
+                    <x-icon name="close" class="h-4 w-4" />
+                </button>
             </div>
-            <div class="mt-6 flex justify-end gap-3">
-                <a :href="'/bookings/' + selectedBooking?.id" class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-4 dark:bg-slate-100 dark:text-slate-900 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50">View</a>
-                <a :href="'/bookings/' + selectedBooking?.id + '/edit'" class="rounded-lg bg-slate-900 px-4 dark:bg-slate-100 dark:text-slate-900 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:hover:bg-white">Edit</a>
+
+            <dl class="mt-5 space-y-3 text-sm">
+                <div class="flex justify-between gap-4">
+                    <dt class="text-muted">Customer</dt>
+                    <dd class="font-medium text-ink" x-text="selectedBooking?.extendedProps?.customerName"></dd>
+                </div>
+                <div class="flex justify-between gap-4">
+                    <dt class="text-muted">Service</dt>
+                    <dd class="font-medium text-ink" x-text="selectedBooking?.extendedProps?.serviceName"></dd>
+                </div>
+                <div class="flex justify-between gap-4">
+                    <dt class="text-muted">Status</dt>
+                    <dd class="font-medium text-ink" x-text="selectedBooking?.extendedProps?.status"></dd>
+                </div>
+                <div class="flex justify-between gap-4">
+                    <dt class="text-muted">Price</dt>
+                    <dd class="numeral font-semibold text-ink" x-text="formatMoney(selectedBooking?.extendedProps?.price)"></dd>
+                </div>
+            </dl>
+
+            <div class="mt-6 flex justify-end gap-2 border-t border-line pt-5">
+                <x-btn variant="ghost" @click="openBooking()">Open booking</x-btn>
+                <x-btn variant="accent" @click="rescheduleBooking()">Reschedule</x-btn>
             </div>
         </div>
     </div>
 
-    {{-- Quick book modal --}}
-    <div x-show="showBookModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm" style="display:none;">
-        <div @click.outside="showBookModal = false" class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
-            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Quick Book</h3>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400" x-text="bookDate"></p>
-            <form @submit.prevent="submitQuickBook()" class="mt-4 space-y-4">
+    {{-- Reschedule --}}
+    <div x-show="showRescheduleModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;"
+         @keydown.escape.window="closeReschedule()">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="closeReschedule()"></div>
+
+        <div class="bento relative w-full max-w-md p-6">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="text-base font-semibold text-ink">Reschedule booking</h3>
+                    <p class="mt-1 text-sm text-muted" x-text="selectedBooking?.extendedProps?.customerName"></p>
+                </div>
+                <button type="button" @click="closeReschedule()" aria-label="Close reschedule"
+                        class="flex h-8 w-8 items-center justify-center rounded-[0.65rem] border border-line text-muted transition-colors hover:border-accent-line hover:text-ink">
+                    <x-icon name="close" class="h-4 w-4" />
+                </button>
+            </div>
+
+            <form @submit.prevent="saveReschedule()" class="mt-5 space-y-4">
+                @csrf
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <x-field label="Date" for="reschedule_date">
+                        <x-input id="reschedule_date" type="date" name="appointment_date"
+                                 x-model="rescheduleDate" min="{{ now()->toDateString() }}" @change="loadRescheduleSlots()" />
+                    </x-field>
+
+                    <x-field label="Time" for="reschedule_time" hint="Save keeps the slot locked until you change it.">
+                        <x-select id="reschedule_time" name="appointment_time" x-model="rescheduleTime">
+                            <template x-for="slot in rescheduleSlots" :key="slot">
+                                <option :value="slot" x-text="formatTime(slot)"></option>
+                            </template>
+                        </x-select>
+                    </x-field>
+                </div>
+
+                <p x-show="rescheduleError" x-text="rescheduleError" class="text-xs font-medium text-red-500"></p>
+
+                <div class="flex flex-wrap justify-end gap-2 border-t border-line pt-5">
+                    <x-btn variant="ghost" type="button" @click="closeReschedule()">Cancel</x-btn>
+                    <x-btn variant="accent" type="submit" ::disabled="saving">
+                        <span x-show="!saving">Save changes</span>
+                        <span x-show="saving">Saving…</span>
+                    </x-btn>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Quick book --}}
+    <div x-show="showBookModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="showBookModal = false"></div>
+
+        <div class="bento relative w-full max-w-md p-6">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="text-base font-semibold text-ink">Quick book</h3>
+                    <p class="numeral mt-1 text-xs text-muted" x-text="bookDate"></p>
+                </div>
+                <button type="button" @click="showBookModal = false" aria-label="Close"
+                        class="text-muted transition-colors hover:text-ink">
+                    <x-icon name="close" class="h-4 w-4" />
+                </button>
+            </div>
+
+            <form @submit.prevent="submitQuickBook()" class="mt-5 space-y-4">
                 @csrf
                 <input type="hidden" name="appointment_date" :value="bookDate">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Customer</label>
-                    <select name="customer_id" x-model="customerId" @change="customerSelected" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                        <option value="">Select existing customer...</option>
+
+                <x-field label="Existing customer">
+                    <x-select name="customer_id" x-model="customerId" @change="customerSelected">
+                        <option value="">None — new customer</option>
                         @foreach (\App\Models\Customer::orderBy('name')->get() as $c)
                             <option value="{{ $c->id }}">{{ $c->name }}</option>
                         @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Or new customer name</label>
-                    <input type="text" name="customer_name" x-model="customerName" @input="typedCustomer()" placeholder="Type a new customer name" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Service</label>
-                    <select name="service_id" required x-model="bookServiceId" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
+                    </x-select>
+                </x-field>
+
+                <x-field label="New customer name">
+                    <x-input name="customer_name" x-model="customerName" @input="typedCustomer()" placeholder="e.g. Marco Reyes" />
+                </x-field>
+
+                <x-field label="Service">
+                    <x-select name="service_id" required x-model="bookServiceId">
                         @foreach (\App\Models\Service::where('active', true)->orderBy('name')->get() as $s)
-                            <option value="{{ $s->id }}">{{ $s->name }} — {{ money($s->price) }} ({{ $s->duration }}min)</option>
+                            <option value="{{ $s->id }}">{{ $s->name }} — {{ money($s->price) }} ({{ $s->duration }} min)</option>
                         @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Time</label>
-                    <input type="time" name="appointment_time" x-model="bookTime" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 text-slate-900 dark:text-white focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                    <p class="mt-1 text-xs text-slate-400">Pick a time; overlapping bookings are rejected.</p>
-                </div>
-                <p x-show="quickError" x-text="quickError" class="text-xs text-red-600"></p>
-                <div class="flex flex-wrap justify-end gap-3">
-                    <button type="button" @click="showBookModal = false" class="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 px-4 dark:bg-slate-100 dark:text-slate-900 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50">Cancel</button>
-                    <button type="button" @click="submitBlock()" :disabled="saving" class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 disabled:opacity-60">
-                        <span x-show="!saving">Block schedule</span>
-                        <span x-show="saving">Saving...</span>
-                    </button>
-                    <button type="submit" :disabled="saving" class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-60">
-                        <span x-show="!saving">Add to Calendar</span>
-                        <span x-show="saving">Saving...</span>
-                    </button>
+                    </x-select>
+                </x-field>
+
+                <x-field label="Time" hint="Overlapping bookings are rejected.">
+                    <x-input type="time" name="appointment_time" x-model="bookTime" required />
+                </x-field>
+
+                <p x-show="quickError" x-text="quickError" class="text-xs font-medium text-red-500"></p>
+
+                <div class="flex flex-wrap justify-end gap-2 border-t border-line pt-5">
+                    <x-btn variant="ghost" type="button" @click="showBookModal = false">Cancel</x-btn>
+                    <x-btn variant="danger" type="button" @click="submitBlock()" ::disabled="saving">
+                        <span x-show="!saving">Block the day</span>
+                        <span x-show="saving">Saving…</span>
+                    </x-btn>
+                    <x-btn variant="accent" type="submit" ::disabled="saving">
+                        <span x-show="!saving">Add to calendar</span>
+                        <span x-show="saving">Saving…</span>
+                    </x-btn>
                 </div>
             </form>
         </div>
@@ -125,6 +230,11 @@ document.addEventListener('alpine:init', () => {
         calendarTitle: '',
         showModal: false,
         selectedBooking: null,
+        showRescheduleModal: false,
+        rescheduleDate: '',
+        rescheduleTime: '',
+        rescheduleSlots: [],
+        rescheduleError: '',
         showBookModal: false,
         bookDate: '',
         bookServiceId: '',
@@ -183,6 +293,126 @@ document.addEventListener('alpine:init', () => {
 
         changeView(view) {
             this.calendar.changeView(view);
+        },
+
+        openBooking() {
+            const id = this.selectedBooking?.id;
+            if (!id) return;
+            window.location.href = '/bookings/' + id;
+        },
+
+        rescheduleBooking() {
+            const booking = this.selectedBooking;
+            if (!booking) return;
+            const props = booking.extendedProps || {};
+
+            this.rescheduleDate = this.toDateInput(props.appointmentDate || props.start || booking.start || '');
+            this.rescheduleTime = this.toTimeInput(props.appointmentTime || props.start || booking.start || '');
+
+            this.rescheduleError = '';
+            this.showRescheduleModal = true;
+            this.loadRescheduleSlots();
+        },
+
+        toDateInput(value) {
+            if (!value) return '';
+            if (typeof value === 'string') {
+                const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                if (iso) return iso[0];
+            }
+            return this.padDate(value);
+        },
+
+        toTimeInput(value) {
+            if (!value) return '';
+            if (typeof value === 'string') {
+                const match = value.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+                if (match) return match[4] + ':' + match[5];
+                const hm = value.match(/^(\d{2}):(\d{2})/);
+                if (hm) return hm[1] + ':' + hm[2];
+            }
+            if (value instanceof Date && !isNaN(value)) {
+                return String(value.getHours()).padStart(2, '0') + ':' + String(value.getMinutes()).padStart(2, '0');
+            }
+            return '';
+        },
+
+        padDate(value) {
+            if (!(value instanceof Date) || isNaN(value)) return '';
+            const y = value.getFullYear();
+            const m = String(value.getMonth() + 1).padStart(2, '0');
+            const d = String(value.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        },
+
+        closeReschedule() {
+            this.showRescheduleModal = false;
+            this.rescheduleError = '';
+        },
+
+        async loadRescheduleSlots() {
+            this.rescheduleError = '';
+            this.rescheduleSlots = [];
+            const serviceId = this.selectedBooking?.extendedProps?.serviceId;
+            if (!serviceId || !this.rescheduleDate) return;
+
+            const res = await fetch(`{{ route('api.availability.index') }}?date=${this.rescheduleDate}&service_id=${serviceId}`);
+            const data = await res.json().catch(() => ({}));
+            let slots = (data.slots || []).map(s => String(s).slice(0, 5));
+
+            // Keep the booking's own current time selectable so it can be saved unchanged.
+            const current = String(this.selectedBooking?.extendedProps?.appointmentTime || '').slice(0, 5);
+            if (current && !slots.includes(current)) slots.unshift(current);
+
+            this.rescheduleSlots = slots;
+            if (!this.rescheduleTime || !slots.includes(this.rescheduleTime)) {
+                this.rescheduleTime = slots[0] || '';
+            }
+        },
+
+        async saveReschedule() {
+            this.rescheduleError = '';
+            const booking = this.selectedBooking;
+            if (!booking) return;
+            if (!this.rescheduleDate) {
+                this.rescheduleError = 'Please choose the date to move this booking to.';
+                return;
+            }
+            if (!this.rescheduleTime) {
+                this.rescheduleError = 'This date has no open slots. Pick another date or free the schedule first.';
+                return;
+            }
+
+            this.saving = true;
+            try {
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('appointment_date', this.rescheduleDate);
+                formData.append('appointment_time', this.rescheduleTime.slice(0, 5));
+
+                const res = await fetch(`{{ url('bookings') }}/${booking.id}/reschedule`, {
+                    method: 'PATCH',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    body: formData,
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    this.rescheduleError = data.message || 'Could not reschedule this booking. Please try again.';
+                    return;
+                }
+
+                this.showRescheduleModal = false;
+                this.showModal = false;
+                this.toast = data.message || 'Booking rescheduled.';
+                this.calendar.refetchEvents();
+                setTimeout(() => { this.toast = ''; }, 3500);
+            } catch (e) {
+                this.rescheduleError = 'Something went wrong. Please try again.';
+            } finally {
+                this.saving = false;
+            }
         },
 
         typedCustomer() {
@@ -291,18 +521,23 @@ document.addEventListener('alpine:init', () => {
             const el = document.getElementById('calendar-wrapper');
             if (!el || !window.html2canvas) return;
 
+            const dark = document.documentElement.classList.contains('dark');
+            const sheet = dark ? '#121212' : '#f4f4f5';
+            const ink = dark ? '#f4f4f5' : '#18181b';
+            const muted = dark ? '#a1a1aa' : '#52525b';
+
             const shopName = '{{ \App\Models\BusinessSetting::get('shop_name', 'Barber Shop') }}';
             const month = this.calendarTitle || this.currentMonthLabel();
 
             const header = document.createElement('div');
-            header.style.cssText = 'text-align:center;padding:16px 8px 12px;font-family:sans-serif;';
+            header.style.cssText = 'text-align:center;padding:16px 8px 12px;font-family:ui-sans-serif,system-ui,sans-serif;';
             header.innerHTML =
-                '<h1 style="font-size:22px;font-weight:700;color:#1e293b;margin:0;">' + shopName + ' — Schedule</h1>' +
-                '<p style="font-size:15px;color:#64748b;margin:6px 0 0;">' + month + '</p>';
+                '<h1 style="font-size:20px;font-weight:600;color:' + ink + ';margin:0;letter-spacing:-0.01em;">' + shopName + ' — schedule</h1>' +
+                '<p style="font-size:14px;color:' + muted + ';margin:6px 0 0;">' + month + '</p>';
             el.prepend(header);
 
             try {
-                const canvas = await window.html2canvas(el, { backgroundColor: '#ffffff', scale: 2 });
+                const canvas = await window.html2canvas(el, { backgroundColor: sheet, scale: 2 });
                 const link = document.createElement('a');
                 link.download = shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-schedule-' + month.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png';
                 link.href = canvas.toDataURL('image/png');

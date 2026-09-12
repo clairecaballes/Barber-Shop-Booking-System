@@ -1,32 +1,31 @@
-@props(['label', 'value', 'icon' => null, 'accent' => 'amber'])
+@props(['label', 'value', 'icon' => null, 'tone' => 'default', 'hint' => null])
 
 @php
-    $accents = [
-        'amber' => 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400',
-        'blue' => 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400',
-        'green' => 'bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400',
-        'red' => 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400',
-        'violet' => 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-400',
-        'slate' => 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-    ];
-    $iconClass = $accents[$accent] ?? $accents['amber'];
+    $lit = $tone === 'lit';
 @endphp
 
-<div {{ $attributes->merge(['class' => 'rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900']) }}>
-    <div class="flex items-start justify-between">
-        <div class="min-w-0">
-            <p class="truncate text-sm font-medium text-slate-500 dark:text-slate-400">{{ $label }}</p>
-            <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ $value }}</p>
-        </div>
+<div {{ $attributes->merge(['class' => 'bento bento-hover p-5'.($lit ? ' bento-lit' : '')]) }}>
+    <div class="flex items-start justify-between gap-4">
+        <p class="text-xs font-semibold tracking-wide text-muted">{{ $label }}</p>
+
         @if ($icon)
-            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {{ $iconClass }}">
-                <x-icon :name="$icon" class="h-5 w-5" />
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.65rem] border {{ $lit ? 'border-accent-line text-accent' : 'border-line text-muted' }}"
+                  style="{{ $lit
+                      ? 'background-image: linear-gradient(180deg, var(--accent-soft), transparent);'
+                      : 'background-image: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);' }}">
+                <x-icon :name="$icon" class="h-4 w-4" />
             </span>
         @endif
     </div>
 
+    <p class="numeral mt-4 text-2xl font-semibold {{ $lit ? 'text-ink' : 'text-ink' }}">{{ $value }}</p>
+
+    @if ($hint)
+        <p class="mt-1 text-xs text-muted">{{ $hint }}</p>
+    @endif
+
     @isset($footer)
-        <div class="mt-3 border-t border-slate-100 dark:border-slate-800 pt-2 text-xs text-slate-500 dark:text-slate-400">
+        <div class="mt-4 border-t border-line pt-2.5 text-xs text-muted">
             {{ $footer }}
         </div>
     @endisset

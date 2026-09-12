@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Service;
 use App\Services\BookingService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -110,7 +111,7 @@ class BookingController extends Controller
         return back()->with('status', 'Booking status updated to '.$status->value.'.');
     }
 
-    public function reschedule(Request $request, Booking $booking): RedirectResponse
+    public function reschedule(Request $request, Booking $booking): JsonResponse|RedirectResponse
     {
         $data = $request->validate([
             'appointment_date' => ['required', 'date'],
@@ -122,6 +123,10 @@ class BookingController extends Controller
             $data['appointment_date'],
             $data['appointment_time'].':00',
         );
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Booking rescheduled.']);
+        }
 
         return back()->with('status', 'Booking rescheduled.');
     }

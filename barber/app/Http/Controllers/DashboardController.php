@@ -24,6 +24,7 @@ class DashboardController extends Controller
             'month_sales' => $this->sales->salesThisMonth(),
             'year_sales' => $this->sales->salesThisYear(),
             'overall_sales' => $this->sales->salesOverall(),
+            'last_seven_days' => $this->sales->salesByDay($now->copy()->subDays(6), $now->copy()),
         ];
 
         return view('dashboard.index', [

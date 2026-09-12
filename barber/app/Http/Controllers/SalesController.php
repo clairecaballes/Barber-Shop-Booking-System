@@ -39,22 +39,8 @@ class SalesController extends Controller
             'busiest_time' => $this->sales->busiestTime(),
         ];
 
-        $period = $request->input('expense_period', 'monthly');
-        if (! in_array($period, ['weekly', 'monthly', 'yearly'], true)) {
-            $period = 'monthly';
-        }
-
-        [$start, $end] = match ($period) {
-            'weekly' => [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()],
-            'yearly' => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
-            default => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
-        };
-
         return view('sales.index', [
             'metrics' => $metrics,
-            'expensePeriod' => $period,
-            'expenseItems' => $this->sales->expenseItemsBetween($start, $end),
-            'expensePeriodTotal' => $this->sales->expensesBetween($start, $end),
         ]);
     }
 }

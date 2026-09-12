@@ -3,11 +3,39 @@
 namespace App\Http\Controllers;
 
 use App\Models\Expense;
+use App\Services\SalesService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\View\View;
 
 class ExpenseController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $period = $request->input('period', 'monthly');
+        if (! in_array($period, ['weekly', 'monthly', 'yearly'], true)) {
+            $period = 'monthly';
+        }
+
+        $now = Carbon::now();
+
+        [$start, $end] = match ($period) {
+            'weekly' => [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()],
+            'yearly' => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
+            default => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
+        };
+
+        $sales = app(SalesService::class);
+
+        return view('expenses.index', [
+            'period' => $period,
+            'items' => $sales->expenseItemsBetween($start, $end),
+            'periodTotal' => $sales->expensesBetween($start, $end),
+            'allTimeTotal' => $sales->expensesOverall(),
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);

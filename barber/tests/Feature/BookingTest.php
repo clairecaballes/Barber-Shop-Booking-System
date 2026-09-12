@@ -222,6 +222,6 @@ class BookingTest extends TestCase
         $this->assertNotEmpty($events);
         $this->assertStringContainsString('Anna Cruz', $events[0]['title']);
         $this->assertStringContainsString('14:00', $events[0]['start']);
-        $this->assertEquals('#3b82f6', $events[0]['color']);
+        $this->assertEquals('#60a5fa', $events[0]['color']);
     }
 }
