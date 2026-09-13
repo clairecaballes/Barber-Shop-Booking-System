@@ -13,7 +13,7 @@
     };
 @endphp
 
-<span {{ $attributes->merge(['class' => 'chip text-muted']) }}>
+<span {{ $attributes->merge(['class' => 'inline-flex items-center gap-1.5 text-[0.6875rem] font-semibold text-muted']) }}>
     <span class="h-1.5 w-1.5 rounded-full"
           style="background-color: var({{ $meta['var'] }}); box-shadow: 0 0 8px var({{ $meta['var'] }});"></span>
     {{ $meta['label'] }}

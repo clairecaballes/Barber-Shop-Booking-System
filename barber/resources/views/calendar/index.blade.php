@@ -104,7 +104,6 @@
 
             <div class="mt-6 flex justify-end gap-2 border-t border-line pt-5">
                 <x-btn variant="ghost" @click="openBooking()">Open booking</x-btn>
-                <x-btn variant="accent" @click="rescheduleBooking()">Reschedule</x-btn>
             </div>
         </div>
     </div>

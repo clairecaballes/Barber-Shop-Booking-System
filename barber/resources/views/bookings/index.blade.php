@@ -50,7 +50,7 @@
     {{-- Booking list --}}
     <x-panel bodyClass="p-0">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
+            <table class="resp-table w-full text-left text-sm">
                 <thead>
                     <tr class="border-b border-line text-xs text-muted">
                         <th class="px-4 py-3 font-semibold">Customer</th>
@@ -62,16 +62,16 @@
                         <th class="px-4 py-3 font-semibold text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-line">
+                <tbody class="sm:divide-y sm:divide-line">
                     @forelse ($bookings as $booking)
-                        <tr class="transition-colors hover:bg-accent-soft">
-                            <td class="px-4 py-3 font-medium text-ink">{{ $booking->customer->name ?? 'Walk-in' }}</td>
-                            <td class="px-4 py-3 text-muted">{{ $booking->service->name }}</td>
-                            <td class="numeral px-4 py-3 text-muted">{{ $booking->appointment_date->format('M j, Y') }}</td>
-                            <td class="numeral px-4 py-3 text-muted">{{ \Carbon\Carbon::parse($booking->appointment_time)->format('g:i A') }}</td>
-                            <td class="numeral px-4 py-3 font-semibold text-ink">{{ money($booking->price) }}</td>
-                            <td class="px-4 py-3"><x-status-badge :status="$booking->status" /></td>
-                            <td class="px-4 py-3">
+                        <tr class="transition-colors hover:bg-accent-soft {{ $booking->status === \App\Enums\BookingStatus::Completed ? 'resp-complete' : '' }}">
+                            <td data-label="Customer" class="sm:px-4 sm:py-3 font-medium text-ink">{{ $booking->customer->name ?? 'Walk-in' }}</td>
+                            <td data-label="Service" class="sm:px-4 sm:py-3 text-muted">{{ $booking->service->name }}</td>
+                            <td data-label="Date" class="numeral sm:px-4 sm:py-3 text-muted">{{ $booking->appointment_date->format('M j, Y') }}</td>
+                            <td data-label="Time" class="numeral sm:px-4 sm:py-3 text-muted">{{ \Carbon\Carbon::parse($booking->appointment_time)->format('g:i A') }}</td>
+                            <td data-label="Price" class="numeral sm:px-4 sm:py-3 font-semibold text-ink">{{ money($booking->price) }}</td>
+                            <td data-label="Status" class="sm:px-4 sm:py-3"><x-status-badge :status="$booking->status" /></td>
+                            <td data-label="Actions" class="sm:px-4 sm:py-3">
                                 <div class="flex items-center justify-end gap-1" x-data="{ open: false }">
                                     <a href="{{ route('bookings.show', $booking) }}"
                                        class="rounded-[0.55rem] px-2 py-1 text-xs font-medium text-muted transition-colors hover:bg-accent-soft hover:text-ink">View</a>
@@ -105,7 +105,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-10 text-center text-sm text-muted">No bookings match these filters.</td>
+                            <td colspan="7" class="resp-empty sm:px-4 sm:py-10 text-center text-sm text-muted">No bookings match these filters.</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -550,6 +550,92 @@
         letter-spacing: -0.02em;
     }
 
+    /* --- Responsive table ---
+       Data tables collapse into labeled cards below sm. Each cell declares
+       its column name in a data-label attribute, shown as a caption. */
+    .resp-table thead {
+        display: table-header-group;
+    }
+
+    @media (max-width: 639px) {
+        .resp-table,
+        .resp-table tbody,
+        .resp-table tr,
+        .resp-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .resp-table thead {
+            display: none;
+        }
+
+        .resp-table tbody {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .resp-table tbody tr {
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+            border: 1px solid var(--stroke);
+            border-radius: var(--radius-tile);
+            background-image: linear-gradient(180deg, var(--surface-hi) 0%, var(--surface) 42%);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .resp-table tbody tr.resp-complete {
+            border-color: var(--accent-line);
+            background-image: linear-gradient(
+                180deg,
+                color-mix(in oklab, var(--accent) 18%, var(--surface-hi)) 0%,
+                color-mix(in oklab, var(--accent) 10%, var(--surface)) 42%
+            );
+            box-shadow: var(--shadow-sm), 0 16px 38px -26px var(--accent-glow);
+        }
+
+        .resp-table tbody tr > td {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            align-items: baseline;
+            gap: 1rem;
+            padding: 0.15rem 0.85rem;
+            border: 0;
+            line-height: 1.15;
+            text-align: right;
+        }
+
+        .resp-table tbody tr > td:last-child {
+            padding-top: 0.35rem;
+            padding-bottom: 0.35rem;
+        }
+
+        .resp-table tbody tr > td::before {
+            content: attr(data-label);
+            flex-shrink: 0;
+            text-align: left;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            line-height: 1.1;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+        }
+
+        .resp-table tbody tr:has(.resp-empty) {
+            border: 0;
+            border-radius: 0;
+            background: none;
+            box-shadow: none;
+        }
+
+        .resp-table .resp-empty {
+            display: block !important;
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+    }
+
     /* --- Barber pole ------------------------------------------------------
        The one skeuomorphic showpiece: a chrome-capped cylinder of diagonal
        stripes behind curved glass. Rendered at whatever height it is given.
