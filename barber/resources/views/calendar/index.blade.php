@@ -632,7 +632,7 @@ document.addEventListener('alpine:init', () => {
                 + '<h1 style="margin:0;font-size:30px;line-height:1.1;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#4d7c0f;">' + shopName + '</h1>'
                 + '<p style="margin:8px 0 0;font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:#4d7c0f;font-weight:700;">care in every cut.</p>'
                 + '</div>'
-                + '<h3 style="margin:20px auto 20px;text-align:center;font-size:26px;line-height:1.15;font-weight:500;letter-spacing:-0.03em;color:' + ink + ';font-family:ui-sans-serif,system-ui,sans-serif;">' + monthTitle + '</h2>'
+                + '<h3 style="margin:20px auto 20px;text-align:center;font-size:30px;line-height:1.08;font-weight:700;letter-spacing:0.02em;color:' + ink + ';font-family:Georgia,\'Times New Roman\',serif;text-transform:uppercase;">' + monthTitle + '</h3>'
                 + '<div style="display:flex;flex:1;flex-direction:column;justify-content:flex-start;padding-top:10px;border-top:1px solid ' + line + ';font-family:ui-sans-serif,system-ui,sans-serif;">'
                 + (listHtml || '<p style="margin:0;font-size:13px;color:' + muted + ';">No bookings scheduled for this month.</p>')
                 + '</div>'
