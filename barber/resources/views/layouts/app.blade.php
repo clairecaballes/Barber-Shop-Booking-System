@@ -76,8 +76,8 @@
             <div class="flex items-center justify-between gap-3 px-4 py-3 lg:px-8">
                 <div class="flex min-w-0 items-center gap-3">
                     <button type="button" @click="sidebarOpen = true" aria-label="Open menu"
-                            class="chrome flex h-9 w-9 items-center justify-center rounded-[0.65rem] border border-white/10 text-rail-accent transition-colors hover:text-rail-accent-hi lg:hidden">
-                        <x-icon name="menu" class="h-4 w-4" />
+                            class="flex h-9 w-9 items-center justify-center rounded-[0.65rem] border border-transparent bg-transparent text-ink transition-colors hover:text-accent lg:hidden">
+                        <x-icon name="menu" class="h-5 w-5" />
                     </button>
                     <div class="min-w-0">
                         <h1 class="truncate text-sm font-semibold text-ink sm:text-base">@yield('title', 'Dashboard')</h1>
@@ -96,9 +96,9 @@
                     {{-- Theme toggle --}}
                     <button type="button" onclick="toggleTheme()" aria-label="Toggle light and dark theme"
                             title="Toggle light and dark theme"
-                            class="chrome flex h-9 w-9 items-center justify-center rounded-[0.65rem] border border-white/10 text-rail-accent transition-colors hover:text-rail-accent-hi">
-                        <x-icon name="sun" class="h-4 w-4 dark:hidden" />
-                        <x-icon name="moon" class="hidden h-4 w-4 dark:block" />
+                            class="flex h-9 w-9 items-center justify-center rounded-[0.65rem] border border-transparent bg-transparent text-ink transition-colors hover:text-accent">
+                        <x-icon name="sun" class="h-5 w-5 dark:hidden" />
+                        <x-icon name="moon" class="hidden h-5 w-5 dark:block" />
                     </button>
 
                     {{-- User menu --}}

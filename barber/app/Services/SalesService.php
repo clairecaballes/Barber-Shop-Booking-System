@@ -183,20 +183,21 @@ class SalesService
      */
     public function busiestDay(): ?string
     {
-        $day = Booking::query()
-            ->completed()
-            ->selectRaw('strftime("%w", appointment_date) as day_of_week, COUNT(*) as count')
-            ->groupBy('day_of_week')
-            ->orderByDesc('count')
-            ->first();
+        $counts = [];
 
-        if (! $day) {
+        foreach (Booking::query()->completed()->select('appointment_date')->get() as $booking) {
+            $day = Carbon::parse($booking->appointment_date)->dayOfWeek;
+            $counts[$day] = ($counts[$day] ?? 0) + 1;
+        }
+
+        if ($counts === []) {
             return null;
         }
 
+        $bestDay = array_keys($counts, max($counts))[0];
         $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-        return $days[(int) $day->day_of_week] ?? null;
+        return $days[(int) $bestDay] ?? null;
     }
 
     /**
@@ -204,18 +205,21 @@ class SalesService
      */
     public function busiestTime(): ?string
     {
-        $hour = Booking::query()
-            ->completed()
-            ->selectRaw('CAST(substr(appointment_time, 1, 2) AS INTEGER) as hour, COUNT(*) as count')
-            ->groupBy('hour')
-            ->orderByDesc('count')
-            ->first();
+        $counts = [];
 
-        if (! $hour) {
+        foreach (Booking::query()->completed()->select('appointment_time')->get() as $booking) {
+            $time = (string) ($booking->appointment_time ?? '00:00');
+            $hour = (int) substr($time, 0, 2);
+            $counts[$hour] = ($counts[$hour] ?? 0) + 1;
+        }
+
+        if ($counts === []) {
             return null;
         }
 
-        return Carbon::parse(sprintf('%02d:00', $hour->hour))->format('g:i A');
+        $bestHour = array_keys($counts, max($counts))[0];
+
+        return Carbon::parse(sprintf('%02d:00', $bestHour))->format('g:i A');
     }
 
     /**
@@ -251,13 +255,18 @@ class SalesService
      */
     public function monthlyChartData(Carbon $start, Carbon $end): array
     {
-        $results = Booking::query()
-            ->completed()
-            ->whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
-            ->selectRaw("strftime('%Y-%m', appointment_date) as month, SUM(price) as total")
-            ->groupBy('month')
-            ->get()
-            ->keyBy('month');
+        $results = [];
+
+        foreach (
+            Booking::query()
+                ->completed()
+                ->whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
+                ->select('appointment_date', 'price')
+                ->get() as $booking
+        ) {
+            $key = Carbon::parse($booking->appointment_date)->format('Y-m');
+            $results[$key] = ($results[$key] ?? 0) + (int) $booking->price;
+        }
 
         $months = [];
         $current = $start->copy()->startOfMonth();
@@ -266,7 +275,7 @@ class SalesService
             $key = $current->format('Y-m');
             $months[] = [
                 'label' => $current->format('M Y'),
-                'value' => $results[$key]->total ?? 0,
+                'value' => $results[$key] ?? 0,
             ];
             $current->addMonth();
         }
@@ -279,13 +288,18 @@ class SalesService
      */
     public function yearlyChartData(Carbon $start, Carbon $end): array
     {
-        $results = Booking::query()
-            ->completed()
-            ->whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
-            ->selectRaw("strftime('%Y', appointment_date) as year, SUM(price) as total")
-            ->groupBy('year')
-            ->get()
-            ->keyBy('year');
+        $results = [];
+
+        foreach (
+            Booking::query()
+                ->completed()
+                ->whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
+                ->select('appointment_date', 'price')
+                ->get() as $booking
+        ) {
+            $key = Carbon::parse($booking->appointment_date)->format('Y');
+            $results[$key] = ($results[$key] ?? 0) + (int) $booking->price;
+        }
 
         $years = [];
         $current = $start->copy()->startOfYear();
@@ -294,7 +308,7 @@ class SalesService
             $key = $current->format('Y');
             $years[] = [
                 'label' => $key,
-                'value' => $results[$key]->total ?? 0,
+                'value' => $results[$key] ?? 0,
             ];
             $current->addYear();
         }
