@@ -65,7 +65,7 @@
 
     {{-- Board --}}
     <x-panel bodyClass="p-4">
-        <div id="calendar-wrapper">
+        <div id="calendar-wrapper" class="h-[calc(100svh-15rem)] lg:h-[42rem]">
             <div id="calendar"></div>
         </div>
     </x-panel>
@@ -203,14 +203,20 @@
 
                 <p x-show="quickError" x-text="quickError" class="text-xs font-medium text-red-500"></p>
 
-                <div class="flex flex-wrap justify-end gap-2 border-t border-line pt-5">
-                    <x-btn variant="ghost" type="button" @click="showBookModal = false">Cancel</x-btn>
-                    <x-btn variant="danger" type="button" @click="submitBlock()" ::disabled="saving">
-                        <span x-show="!saving">Block the day</span>
+                <div class="grid grid-cols-3 gap-2 border-t border-line pt-5 sm:flex sm:justify-end sm:gap-2">
+                    <x-btn variant="ghost" type="button" @click="showBookModal = false" class="w-full px-0 text-center">Cancel</x-btn>
+                    <x-btn variant="danger" type="button" @click="submitBlock()" ::disabled="saving" class="w-full px-0 text-center">
+                        <span x-show="!saving">
+                            <span class="sm:hidden">Block</span>
+                            <span class="hidden sm:inline">Block the day</span>
+                        </span>
                         <span x-show="saving">Saving…</span>
                     </x-btn>
-                    <x-btn variant="accent" type="submit" ::disabled="saving">
-                        <span x-show="!saving">Add to calendar</span>
+                    <x-btn variant="accent" type="submit" ::disabled="saving" class="w-full px-0 text-center">
+                        <span x-show="!saving">
+                            <span class="sm:hidden">Add</span>
+                            <span class="hidden sm:inline">Add to calendar</span>
+                        </span>
                         <span x-show="saving">Saving…</span>
                     </x-btn>
                 </div>
@@ -259,6 +265,8 @@ document.addEventListener('alpine:init', () => {
                 nowIndicator: true,
                 displayEventTime: true,
                 eventTimeFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short' },
+                height: '100%',
+                expandRows: true,
                 dayMaxEvents: 4,
                 eventSources: [{
                     url: '{{ route("api.calendar.events") }}',
@@ -517,6 +525,12 @@ document.addEventListener('alpine:init', () => {
         },
 
         async downloadCalendar() {
+            // On small screens a screenshot of the grid doesn't survive screen
+            // width — export an attractive day-by-day list instead.
+            if (window.matchMedia('(max-width: 639px)').matches) {
+                return this.downloadScheduleList();
+            }
+
             const el = document.getElementById('calendar-wrapper');
             if (!el || !window.html2canvas) return;
 
@@ -544,6 +558,96 @@ document.addEventListener('alpine:init', () => {
             } finally {
                 header.remove();
             }
+        },
+
+        async downloadScheduleList() {
+            if (!window.html2canvas) return;
+
+            const dark = document.documentElement.classList.contains('dark');
+            const sheet = dark ? '#121212' : '#f4f4f5';
+            const ink = dark ? '#f4f4f5' : '#18181b';
+            const muted = dark ? '#a1a1aa' : '#52525b';
+            const line = dark ? '#2e2e33' : '#dcdcdf';
+            const accent = dark ? '#ccff00' : '#4d7c0f';
+            const danger = dark ? '#ff6b6b' : '#b91c1c';
+
+            const shopName = '{{ \App\Models\BusinessSetting::get('shop_name', 'Barber Shop') }}';
+            const monthMatch = (this.calendarTitle || '').match(/^([A-Za-z]+)\s+\d{4}$/);
+            const monthLabel = monthMatch ? monthMatch[1] : this.currentMonthLabel().split(' ')[0];
+            const maxDuration = @json(\App\Models\Service::where('active', true)->max('duration'));
+            const durLabel = maxDuration
+                ? (maxDuration % 60 === 0 ? (maxDuration / 60) + ' hr' : maxDuration) + ' maximum time per customer'
+                : '';
+
+            const byDay = {};
+            (this.calendar?.getEvents() || []).forEach(e => {
+                if (!(e.start instanceof Date) || isNaN(e.start)) return;
+                const key = this.padDate(e.start);
+                if (!byDay[key]) byDay[key] = [];
+                const block = e.extendedProps?.blocked;
+                byDay[key].push({
+                    block: !!block,
+                    time: block ? '' : this.formatTimeDate(e.start),
+                    status: block ? '' : (e.extendedProps?.status || ''),
+                    label: block ? (e.extendedProps?.reason || e.title || 'Barber on leave') : e.title,
+                });
+            });
+
+            let listHtml = '';
+            Object.keys(byDay).sort().forEach(key => {
+                const entries = byDay[key].sort((a, b) => (a.block ? 0 : 1) - (b.block ? 0 : 1) || a.time.localeCompare(b.time));
+                const d = new Date(key + 'T00:00:00');
+                const dayLabel = d.toLocaleString('en-US', { month: 'long', day: 'numeric' });
+                const dayName = d.toLocaleString('en-US', { weekday: 'short' });
+
+                listHtml += '<div style="margin-top:18px;">';
+                listHtml += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">'
+                    + '<h3 style="margin:0;font-size:14px;font-weight:600;color:' + ink + ';">' + dayLabel + '</h3>'
+                    + '<span style="font-size:11px;color:' + muted + ';">' + dayName + '</span></div>';
+                entries.forEach(en => {
+                    if (en.block) {
+                        listHtml += '<div style="margin-top:6px;font-size:13px;font-weight:700;color:' + danger + ';">' + en.label + '</div>';
+                    } else {
+                        listHtml += '<div style="margin-top:6px;display:flex;align-items:baseline;gap:8px;">'
+                            + '<span style="font-family:ui-monospace,monospace;font-size:12px;color:' + accent + ';min-width:70px;">' + en.time + '</span>'
+                            + '<span style="font-size:13px;color:' + ink + ';">' + en.label + '</span>'
+                            + '<span style="margin-left:auto;font-size:11px;color:' + muted + ';">' + en.status + '</span></div>';
+                    }
+                });
+                listHtml += '</div>';
+            });
+
+            const node = document.createElement('div');
+            node.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + Math.min(430, window.innerWidth) + 'px;z-index:-1;';
+            node.innerHTML =
+                '<div style="font-family:ui-sans-serif,system-ui,sans-serif;background:' + sheet + ';color:' + ink + ';padding:24px;border-radius:20px;">'
+                + '<h2 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.01em;color:' + ink + ';">My ' + monthLabel + ' Schedule</h2>'
+                + (durLabel ? '<p style="margin:4px 0 0;font-size:12px;color:' + muted + ';">' + durLabel + '</p>' : '')
+                + '<div style="margin-top:14px;padding-top:4px;border-top:1px solid ' + line + ';">'
+                + (listHtml || '<p style="margin:0;font-size:13px;color:' + muted + ';">No bookings yet this month.</p>')
+                + '</div>'
+                + '<p style="margin:20px 0 0;font-size:11px;color:' + muted + ';">' + shopName + ' — schedule export</p>'
+                + '</div>';
+            document.body.appendChild(node);
+
+            try {
+                const canvas = await window.html2canvas(node, { backgroundColor: sheet, scale: 2 });
+                const link = document.createElement('a');
+                link.download = shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-schedule-' + monthLabel.toLowerCase() + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } finally {
+                node.remove();
+            }
+        },
+
+        formatTimeDate(date) {
+            if (!(date instanceof Date) || isNaN(date)) return '';
+            let h = date.getHours();
+            const m = String(date.getMinutes()).padStart(2, '0');
+            const ap = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return h + ':' + m + ' ' + ap;
         },
 
         currentMonthLabel() {

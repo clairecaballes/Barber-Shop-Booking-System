@@ -41,20 +41,27 @@
                         $close = $settings['operating_hours'][$day]['close'] ?? '';
                     @endphp
 
-                    <div class="bento-sunken flex flex-wrap items-center gap-3 px-4 py-3">
-                        <span class="w-24 shrink-0 text-sm font-medium capitalize text-ink">{{ $day }}</span>
+                    <div class="bento-sunken px-4 py-3 sm:flex sm:items-center sm:gap-3">
+                        <span class="flex w-full items-center justify-between gap-3 sm:w-24 sm:shrink-0">
+                            <span class="text-sm font-medium capitalize text-ink">{{ $day }}</span>
+                            @if (! $open || ! $close)
+                                <span class="chip text-muted sm:hidden">Closed</span>
+                            @endif
+                        </span>
 
-                        <input type="time" name="operating_hours[{{ $day }}][open]" value="{{ $open }}"
-                               aria-label="{{ ucfirst($day) }} opening time" class="field w-32">
+                        <div class="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:mt-0 sm:flex sm:items-center sm:gap-3">
+                            <input type="time" name="operating_hours[{{ $day }}][open]" value="{{ $open }}"
+                                   aria-label="{{ ucfirst($day) }} opening time" class="field w-full sm:w-32">
 
-                        <span class="text-sm text-muted">to</span>
+                            <span class="text-sm text-muted">to</span>
 
-                        <input type="time" name="operating_hours[{{ $day }}][close]" value="{{ $close }}"
-                               aria-label="{{ ucfirst($day) }} closing time" class="field w-32">
+                            <input type="time" name="operating_hours[{{ $day }}][close]" value="{{ $close }}"
+                                   aria-label="{{ ucfirst($day) }} closing time" class="field w-full sm:w-32">
 
-                        @if (! $open || ! $close)
-                            <span class="chip text-muted">Closed</span>
-                        @endif
+                            @if (! $open || ! $close)
+                                <span class="chip text-muted hidden sm:inline-flex">Closed</span>
+                            @endif
+                        </div>
                     </div>
                 @endforeach
             </div>

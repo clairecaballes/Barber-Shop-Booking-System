@@ -86,7 +86,7 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    @if (Route::has('quick-bookings.index'))
+                    @if (Route::has('quick-bookings.index') && !request()->routeIs('calendar.index'))
                         <x-btn variant="accent" :href="route('quick-bookings.index')" class="hidden sm:inline-flex">
                             <x-icon name="plus" class="h-4 w-4" />
                             Quick booking
@@ -142,6 +142,14 @@
         </main>
     </div>
 </div>
+
+@if (Route::has('quick-bookings.index') && request()->routeIs('calendar.index'))
+    {{-- Floating quick-booking FAB: calendar page only, on all screens. The topbar button is hidden there. --}}
+    <a href="{{ route('quick-bookings.index') }}" aria-label="Quick booking"
+       class="btn btn-accent fab-accent fixed bottom-6 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full p-0 active:scale-95 sm:bottom-7 sm:right-7 sm:h-16 sm:w-16 lg:bottom-8 lg:right-8">
+        <x-icon name="plus" class="relative h-6 w-6 sm:h-7 sm:w-7" />
+    </a>
+@endif
 
 @stack('scripts')
 </body>

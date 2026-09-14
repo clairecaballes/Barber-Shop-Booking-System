@@ -37,7 +37,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('calendar.index'));
+        return redirect()->intended(route('dashboard'));
     }
 
     /**

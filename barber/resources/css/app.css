@@ -323,6 +323,48 @@
         filter: brightness(1.06);
     }
 
+    /* Floating action button: lime disc with a soft halo + idle pulse. */
+    .fab-accent {
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.45),
+            0 0 0 4px var(--accent-soft),
+            0 14px 32px -10px var(--accent-glow),
+            0 0 30px -4px var(--accent-glow);
+    }
+
+    .fab-accent::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 9999px;
+        box-shadow: 0 0 0 0 var(--accent-glow);
+        animation: fab-pulse 2.8s ease-out infinite;
+    }
+
+    .fab-accent:hover {
+        filter: brightness(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.45),
+            0 0 0 6px var(--accent-soft),
+            0 18px 40px -12px var(--accent-glow),
+            0 0 44px -2px var(--accent-glow);
+    }
+
+    @keyframes fab-pulse {
+        0% {
+            box-shadow: 0 0 0 0 var(--accent-glow);
+            opacity: 1;
+        }
+        70% {
+            box-shadow: 0 0 0 14px transparent;
+            opacity: 0;
+        }
+        100% {
+            box-shadow: 0 0 0 0 transparent;
+            opacity: 0;
+        }
+    }
+
     /* Brushed metal: for secondary actions that still deserve presence. */
     .btn-metal {
         color: var(--ink);

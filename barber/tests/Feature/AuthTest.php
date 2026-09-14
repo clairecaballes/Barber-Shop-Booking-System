@@ -37,7 +37,7 @@ class AuthTest extends TestCase
         $this->post(route('login.attempt'), [
             'email' => 'owner@test.com',
             'password' => 'password',
-        ])->assertRedirect(route('calendar.index'));
+        ])->assertRedirect(route('dashboard'));
 
         $this->assertAuthenticatedAs($owner);
     }
@@ -63,7 +63,7 @@ class AuthTest extends TestCase
             'email' => 'staff@test.com',
             'password' => 'secret-pass-1',
             'password_confirmation' => 'secret-pass-1',
-        ])->assertRedirect(route('calendar.index'));
+        ])->assertRedirect(route('dashboard'));
 
         $this->assertAuthenticated();
         $this->assertDatabaseHas('users', [

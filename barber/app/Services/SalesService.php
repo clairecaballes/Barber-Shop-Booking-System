@@ -64,7 +64,7 @@ class SalesService
     public function expensesBetween(Carbon $start, Carbon $end): int
     {
         return (int) Expense::query()
-            ->whereBetween('expense_date', [$start, $end])
+            ->whereBetween('expense_date', [$start->toDateString(), $end->toDateString()])
             ->sum('cost');
     }
 
@@ -76,7 +76,7 @@ class SalesService
     public function expenseItemsBetween(Carbon $start, Carbon $end): Collection
     {
         return Expense::query()
-            ->whereBetween('expense_date', [$start, $end])
+            ->whereBetween('expense_date', [$start->toDateString(), $end->toDateString()])
             ->orderByDesc('expense_date')
             ->orderByDesc('created_at')
             ->get();
@@ -86,7 +86,7 @@ class SalesService
     {
         return Booking::query()
             ->completed()
-            ->whereBetween('appointment_date', [$start, $end])
+            ->whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
             ->sum('price');
     }
 
@@ -225,7 +225,7 @@ class SalesService
     {
         $results = Booking::query()
             ->completed()
-            ->whereBetween('appointment_date', [$start, $end])
+            ->whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
             ->selectRaw('appointment_date, SUM(price) as total')
             ->groupBy('appointment_date')
             ->get()
@@ -253,7 +253,7 @@ class SalesService
     {
         $results = Booking::query()
             ->completed()
-            ->whereBetween('appointment_date', [$start, $end])
+            ->whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
             ->selectRaw("strftime('%Y-%m', appointment_date) as month, SUM(price) as total")
             ->groupBy('month')
             ->get()
@@ -281,7 +281,7 @@ class SalesService
     {
         $results = Booking::query()
             ->completed()
-            ->whereBetween('appointment_date', [$start, $end])
+            ->whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
             ->selectRaw("strftime('%Y', appointment_date) as year, SUM(price) as total")
             ->groupBy('year')
             ->get()
