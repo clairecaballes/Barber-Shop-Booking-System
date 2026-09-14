@@ -39,7 +39,7 @@
             </x-field>
 
             <x-field label="New customer name" for="customer_name" hint="Leave blank if you picked someone above." errorName="customer_name">
-                <x-input id="customer_name" name="customer_name" x-model="customerName" ::disabled="customerId"
+                <x-input id="customer_name" name="customer_name" x-model="customerName" x-bind:disabled="Boolean(customerId)"
                          placeholder="e.g. Marco Reyes" value="{{ old('customer_name') }}" />
             </x-field>
 

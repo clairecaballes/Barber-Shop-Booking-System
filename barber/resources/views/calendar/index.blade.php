@@ -18,17 +18,9 @@
     {{-- Controls --}}
     <div class="mb-5 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
-            <button @click="calendar.prev()" aria-label="Previous period"
-                    class="chrome flex h-9 w-9 items-center justify-center rounded-[0.65rem] border border-white/10 text-rail-muted transition-colors hover:text-rail-ink">
-                <x-icon name="chevron-left" class="h-4 w-4" />
-            </button>
-
-            <h2 x-text="calendarTitle" class="min-w-[10rem] px-1 text-center text-sm font-semibold text-ink sm:text-base"></h2>
-
-            <button @click="calendar.next()" aria-label="Next period"
-                    class="chrome flex h-9 w-9 items-center justify-center rounded-[0.65rem] border border-white/10 text-rail-muted transition-colors hover:text-rail-ink">
-                <x-icon name="chevron-right" class="h-4 w-4" />
-            </button>
+            <label for="calendar-month-picker" class="sr-only">Choose month</label>
+            <input id="calendar-month-picker" type="month" x-model="monthPicker" @change="changeMonth($event.target.value)"
+                   class="calendar-month-control">
 
             <x-btn variant="ghost" @click="calendar.today()" class="ml-1">Today</x-btn>
         </div>
@@ -147,7 +139,7 @@
 
                 <div class="flex flex-wrap justify-end gap-2 border-t border-line pt-5">
                     <x-btn variant="ghost" type="button" @click="closeReschedule()">Cancel</x-btn>
-                    <x-btn variant="accent" type="submit" ::disabled="saving">
+                    <x-btn variant="accent" type="submit" x-bind:disabled="saving">
                         <span x-show="!saving">Save changes</span>
                         <span x-show="saving">Saving…</span>
                     </x-btn>
@@ -174,7 +166,7 @@
 
             <form @submit.prevent="submitQuickBook()" class="mt-5 space-y-4">
                 @csrf
-                <input type="hidden" name="appointment_date" :value="bookDate">
+                <input type="hidden" name="appointment_date" x-bind:value="bookDate">
 
                 <x-field label="Existing customer">
                     <x-select name="customer_id" x-model="customerId" @change="customerSelected">
@@ -205,14 +197,14 @@
 
                 <div class="grid grid-cols-3 gap-2 border-t border-line pt-5 sm:flex sm:justify-end sm:gap-2">
                     <x-btn variant="ghost" type="button" @click="showBookModal = false" class="w-full px-0 text-center">Cancel</x-btn>
-                    <x-btn variant="danger" type="button" @click="submitBlock()" ::disabled="saving" class="w-full px-0 text-center">
+                    <x-btn variant="danger" type="button" @click="submitBlock()" x-bind:disabled="saving" class="w-full px-0 text-center">
                         <span x-show="!saving">
                             <span class="sm:hidden">Block</span>
                             <span class="hidden sm:inline">Block the day</span>
                         </span>
                         <span x-show="saving">Saving…</span>
                     </x-btn>
-                    <x-btn variant="accent" type="submit" ::disabled="saving" class="w-full px-0 text-center">
+                    <x-btn variant="accent" type="submit" x-bind:disabled="saving" class="w-full px-0 text-center">
                         <span x-show="!saving">
                             <span class="sm:hidden">Add</span>
                             <span class="hidden sm:inline">Add to calendar</span>
@@ -247,6 +239,7 @@ document.addEventListener('alpine:init', () => {
         customerId: '',
         customerName: '',
         bookTime: '',
+        monthPicker: '',
         saving: false,
         quickError: '',
         toast: '',
@@ -292,14 +285,31 @@ document.addEventListener('alpine:init', () => {
                 datesSet(info) {
                     self.calendarTitle = info.view.title;
                     self.currentView = info.view.type;
+                    self.syncMonthPicker();
                 },
             });
 
             this.calendar.render();
+            this.syncMonthPicker();
+        },
+
+        syncMonthPicker() {
+            const date = this.calendar?.getDate ? this.calendar.getDate() : new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            this.monthPicker = `${year}-${month}`;
+        },
+
+        changeMonth(value) {
+            if (!value) return;
+            const [year, month] = value.split('-').map(Number);
+            this.calendar?.gotoDate(new Date(year, month - 1, 1));
+            this.syncMonthPicker();
         },
 
         changeView(view) {
             this.calendar.changeView(view);
+            this.syncMonthPicker();
         },
 
         openBooking() {
@@ -626,7 +636,7 @@ document.addEventListener('alpine:init', () => {
                 + '<div style="margin-top:14px;padding-top:4px;border-top:1px solid ' + line + ';">'
                 + (listHtml || '<p style="margin:0;font-size:13px;color:' + muted + ';">No bookings yet this month.</p>')
                 + '</div>'
-                + '<p style="margin:20px 0 0;font-size:11px;color:' + muted + ';">' + shopName + ' — schedule export</p>'
+                + '<p style="margin:20px 0 0;font-size:11px;color:' + muted + ';">' + shopName + ' ~ OBS · Built by JCC </p>'
                 + '</div>';
             document.body.appendChild(node);
 
