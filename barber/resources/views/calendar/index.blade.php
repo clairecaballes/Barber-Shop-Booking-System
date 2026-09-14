@@ -627,15 +627,16 @@ document.addEventListener('alpine:init', () => {
             const node = document.createElement('div');
             node.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + Math.min(430, window.innerWidth) + 'px;z-index:-1;';
             node.innerHTML =
-                '<div style="font-family:Georgia,\'Times New Roman\',serif;background:' + sheet + ';color:' + ink + ';padding:26px 22px 20px;border-radius:24px;border:1px solid ' + line + ';box-shadow:0 18px 40px rgba(15,23,42,0.08);">'
+                '<div style="display:flex;flex-direction:column;min-height:820px;font-family:Georgia,\'Times New Roman\',serif;background:' + sheet + ';color:' + ink + ';padding:26px 22px 18px;border-radius:24px;border:1px solid ' + line + ';box-shadow:0 18px 40px rgba(15,23,42,0.08);">'
                 + '<div style="text-align:center;padding-bottom:12px;border-bottom:1px solid ' + line + ';">'
                 + '<h1 style="margin:0;font-size:30px;line-height:1.1;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#4d7c0f;">' + shopName + '</h1>'
                 + '<p style="margin:8px 0 0;font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:#4d7c0f;font-weight:700;">care in every cut.</p>'
                 + '</div>'
-                + '<h2 style="margin:18px 0 14px;text-align:center;font-size:26px;line-height:1.15;font-weight:700;letter-spacing:-0.03em;color:' + ink + ';font-family:ui-sans-serif,system-ui,sans-serif;">' + monthTitle + '</h2>'
-                + '<div style="margin-top:10px;padding-top:10px;border-top:1px solid ' + line + ';font-family:ui-sans-serif,system-ui,sans-serif;">'
+                + '<h3 style="margin:20px auto 20px;text-align:center;font-size:26px;line-height:1.15;font-weight:500;letter-spacing:-0.03em;color:' + ink + ';font-family:ui-sans-serif,system-ui,sans-serif;">' + monthTitle + '</h2>'
+                + '<div style="display:flex;flex:1;flex-direction:column;justify-content:flex-start;padding-top:10px;border-top:1px solid ' + line + ';font-family:ui-sans-serif,system-ui,sans-serif;">'
                 + (listHtml || '<p style="margin:0;font-size:13px;color:' + muted + ';">No bookings scheduled for this month.</p>')
                 + '</div>'
+                + '<div style="margin-top:auto;padding-top:14px;border-top:1px solid ' + line + ';text-align:center;font-size:11px;letter-spacing:0.12em;color:' + muted + ';font-family:ui-sans-serif,system-ui,sans-serif;">OBS developed by JCC</div>'
                 + '</div>';
             document.body.appendChild(node);
 
