@@ -584,10 +584,7 @@ document.addEventListener('alpine:init', () => {
             const shopName = '{{ \App\Models\BusinessSetting::get('shop_name', 'Barber Shop') }}';
             const monthMatch = (this.calendarTitle || '').match(/^([A-Za-z]+)\s+\d{4}$/);
             const monthLabel = monthMatch ? monthMatch[1] : this.currentMonthLabel().split(' ')[0];
-            const maxDuration = @json(\App\Models\Service::where('active', true)->max('duration'));
-            const durLabel = maxDuration
-                ? (maxDuration % 60 === 0 ? (maxDuration / 60) + ' hr' : maxDuration) + ' maximum time per customer'
-                : '';
+            const monthTitle = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1) + ' Schedule';
 
             const byDay = {};
             (this.calendar?.getEvents() || []).forEach(e => {
@@ -630,13 +627,15 @@ document.addEventListener('alpine:init', () => {
             const node = document.createElement('div');
             node.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + Math.min(430, window.innerWidth) + 'px;z-index:-1;';
             node.innerHTML =
-                '<div style="font-family:ui-sans-serif,system-ui,sans-serif;background:' + sheet + ';color:' + ink + ';padding:24px;border-radius:20px;">'
-                + '<h2 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.01em;color:' + ink + ';">My ' + monthLabel + ' Schedule</h2>'
-                + (durLabel ? '<p style="margin:4px 0 0;font-size:12px;color:' + muted + ';">' + durLabel + '</p>' : '')
-                + '<div style="margin-top:14px;padding-top:4px;border-top:1px solid ' + line + ';">'
-                + (listHtml || '<p style="margin:0;font-size:13px;color:' + muted + ';">No bookings yet this month.</p>')
+                '<div style="font-family:Georgia,\'Times New Roman\',serif;background:' + sheet + ';color:' + ink + ';padding:26px 22px 20px;border-radius:24px;border:1px solid ' + line + ';box-shadow:0 18px 40px rgba(15,23,42,0.08);">'
+                + '<div style="text-align:center;padding-bottom:12px;border-bottom:1px solid ' + line + ';">'
+                + '<h1 style="margin:0;font-size:30px;line-height:1.1;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#4d7c0f;">' + shopName + '</h1>'
+                + '<p style="margin:8px 0 0;font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:#4d7c0f;font-weight:700;">care in every cut.</p>'
                 + '</div>'
-                + '<p style="margin:20px 0 0;font-size:11px;color:' + muted + ';">' + shopName + ' ~ OBS · Built by JCC </p>'
+                + '<h2 style="margin:18px 0 14px;text-align:center;font-size:26px;line-height:1.15;font-weight:700;letter-spacing:-0.03em;color:' + ink + ';font-family:ui-sans-serif,system-ui,sans-serif;">' + monthTitle + '</h2>'
+                + '<div style="margin-top:10px;padding-top:10px;border-top:1px solid ' + line + ';font-family:ui-sans-serif,system-ui,sans-serif;">'
+                + (listHtml || '<p style="margin:0;font-size:13px;color:' + muted + ';">No bookings scheduled for this month.</p>')
+                + '</div>'
                 + '</div>';
             document.body.appendChild(node);
 
