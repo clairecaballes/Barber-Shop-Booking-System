@@ -29,5 +29,13 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($key);
         });
+
+        // Account-creation guard: cap registrations per email + IP to keep
+        // the accounts table from being flooded.
+        RateLimiter::for('register', function (Request $request) {
+            $key = strtolower((string) $request->input('email')).'|'.$request->ip();
+
+            return Limit::perMinute(5)->by($key);
+        });
     }
 }

@@ -103,7 +103,12 @@
             <x-btn variant="accent" type="submit" class="w-full py-2.5">Sign in</x-btn>
         </form>
 
-        <p class="mt-8 text-xs text-muted">Private barber management system.</p>
+        <p class="mt-8 text-center text-xs text-muted">
+            No account yet?
+            <a href="{{ route('register') }}" class="font-semibold text-accent transition-colors hover:text-accent-hi">Create one</a>
+        </p>
+
+        <p class="mt-4 text-center text-xs text-muted">Private barber management system.</p>
     </div>
 </div>
 

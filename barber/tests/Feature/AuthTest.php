@@ -51,6 +51,41 @@ class AuthTest extends TestCase
             ->assertSessionHasErrors('email');
     }
 
+    public function test_register_page_is_accessible(): void
+    {
+        $this->get(route('register'))->assertOk();
+    }
+
+    public function test_register_with_valid_details(): void
+    {
+        $this->post(route('register.store'), [
+            'name' => 'New Staff',
+            'email' => 'staff@test.com',
+            'password' => 'secret-pass-1',
+            'password_confirmation' => 'secret-pass-1',
+        ])->assertRedirect(route('calendar.index'));
+
+        $this->assertAuthenticated();
+        $this->assertDatabaseHas('users', [
+            'email' => 'staff@test.com',
+        ]);
+    }
+
+    public function test_register_with_duplicate_email(): void
+    {
+        $this->createOwner();
+
+        $this->post(route('register.store'), [
+            'name' => 'Duplicate',
+            'email' => 'owner@test.com',
+            'password' => 'secret-pass-1',
+            'password_confirmation' => 'secret-pass-1',
+        ])->assertRedirectBack()
+            ->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+    }
+
     public function test_logout(): void
     {
         $this->actingAs($this->createOwner());

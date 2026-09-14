@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BlockedSlotController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BusinessSettingsController;
@@ -20,6 +21,11 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [LoginController::class, 'store'])
         ->middleware('throttle:login')
         ->name('login.attempt');
+
+    Route::get('register', [RegisterController::class, 'create'])->name('register');
+    Route::post('register', [RegisterController::class, 'store'])
+        ->middleware('throttle:register')
+        ->name('register.store');
 
     Route::get('forgot-password', [PasswordResetController::class, 'create'])->name('password.request');
     Route::post('forgot-password', [PasswordResetController::class, 'sendCode'])

@@ -95,6 +95,7 @@ Dark charcoal base + electric lime accent, bento surfaces, chrome materials. Def
 Full feature set built. Key structure:
 
 - `app/Http/Controllers/Auth/LoginController.php` — login/logout
+- `app/Http/Controllers/Auth/RegisterController.php` — account registration (throttled `register` limiter)
 - `app/Http/Controllers/Auth/PasswordResetController.php` — forgot-password: 6-digit one-time code mailed to a matching Gmail (OWASP: generic responses, hashed expiring tokens, throttled routes, sessions wiped on reset)
 - `app/Mail/PasswordResetCode.php` — reset-code email (SMTP via `.env` Gmail app password; codes also fall back to `storage/logs` only if the mailer fails)
 - `app/Http/Controllers/DashboardController.php` — dashboard stats
