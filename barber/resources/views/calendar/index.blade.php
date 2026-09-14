@@ -629,8 +629,8 @@ document.addEventListener('alpine:init', () => {
             node.innerHTML =
                 '<div style="display:flex;flex-direction:column;min-height:820px;font-family:Georgia,\'Times New Roman\',serif;background:' + sheet + ';color:' + ink + ';padding:26px 22px 18px;border-radius:24px;border:1px solid ' + line + ';box-shadow:0 18px 40px rgba(15,23,42,0.08);">'
                 + '<div style="text-align:center;padding-bottom:12px;border-bottom:1px solid ' + line + ';">'
-                + '<h1 style="margin:0;font-size:30px;line-height:1.1;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#4d7c0f;">' + shopName + '</h1>'
-                + '<p style="margin:8px 0 0;font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:#4d7c0f;font-weight:700;">care in every cut.</p>'
+                + '<h1 style="margin:0;font-size:30px;line-height:1.1;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#3b2001;">' + shopName + '</h1>'
+                + '<p style="margin:8px 0 0;font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:#3b2001;font-weight:700;">care in every cut.</p>'
                 + '</div>'
                 + '<h3 style="margin:18px auto 0;text-align:center;font-size:22px;line-height:1.1;font-weight:700;letter-spacing:0.04em;color:' + ink + ';font-family:Georgia,\'Times New Roman\',serif;text-transform:uppercase;white-space:nowrap;">' + monthTitle + '</h3>'
                 + '<div style="display:flex;flex:1;flex-direction:column;justify-content:flex-start;padding-top:14px;font-family:ui-sans-serif,system-ui,sans-serif;">'
