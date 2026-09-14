@@ -632,8 +632,8 @@ document.addEventListener('alpine:init', () => {
                 + '<h1 style="margin:0;font-size:30px;line-height:1.1;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#4d7c0f;">' + shopName + '</h1>'
                 + '<p style="margin:8px 0 0;font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:#4d7c0f;font-weight:700;">care in every cut.</p>'
                 + '</div>'
-                + '<h3 style="margin:20px auto 20px;text-align:center;font-size:30px;line-height:1.08;font-weight:700;letter-spacing:0.02em;color:' + ink + ';font-family:Georgia,\'Times New Roman\',serif;text-transform:uppercase;">' + monthTitle + '</h3>'
-                + '<div style="display:flex;flex:1;flex-direction:column;justify-content:flex-start;padding-top:10px;border-top:1px solid ' + line + ';font-family:ui-sans-serif,system-ui,sans-serif;">'
+                + '<h3 style="margin:18px auto 0;text-align:center;font-size:22px;line-height:1.1;font-weight:700;letter-spacing:0.04em;color:' + ink + ';font-family:Georgia,\'Times New Roman\',serif;text-transform:uppercase;white-space:nowrap;">' + monthTitle + '</h3>'
+                + '<div style="display:flex;flex:1;flex-direction:column;justify-content:flex-start;padding-top:14px;font-family:ui-sans-serif,system-ui,sans-serif;">'
                 + (listHtml || '<p style="margin:0;font-size:13px;color:' + muted + ';">No bookings scheduled for this month.</p>')
                 + '</div>'
                 + '<div style="margin-top:auto;padding-top:14px;border-top:1px solid ' + line + ';text-align:center;font-size:11px;letter-spacing:0.12em;color:' + muted + ';font-family:ui-sans-serif,system-ui,sans-serif;">OBS developed by JCC</div>'
