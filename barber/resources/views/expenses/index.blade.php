@@ -2,7 +2,7 @@
 @section('title', 'Expenses')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ showForm: false }">
 
     @if (session('status'))
         <x-alert>{{ session('status') }}</x-alert>
@@ -35,34 +35,43 @@
         </div>
     </section>
 
-    {{-- Log an expense --}}
-    <x-panel title="Log an expense" bodyClass="p-6" class="bento-raised bento-lift">
-        <form method="POST" action="{{ route('expenses.store') }}" class="space-y-5">
-            @csrf
+    <div class="flex justify-end">
+        <button type="button"
+                @click="showForm = !showForm"
+                class="inline-flex items-center justify-center rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/60">
+            <span x-text="showForm ? 'Close' : 'Log expense'">Log expense</span>
+        </button>
+    </div>
 
-            <div class="grid gap-4 sm:grid-cols-3">
-                <x-field label="Item" for="expense-item" errorName="item">
-                    <x-input id="expense-item" name="item" required placeholder="e.g. clipper oil" />
+    <div x-show="showForm" x-transition.opacity class="contents">
+        <x-panel title="Log an expense" bodyClass="p-6" class="bento-raised bento-lift">
+            <form method="POST" action="{{ route('expenses.store') }}" class="space-y-5">
+                @csrf
+
+                <div class="grid gap-4 sm:grid-cols-3">
+                    <x-field label="Item" for="expense-item" errorName="item">
+                        <x-input id="expense-item" name="item" required placeholder="e.g. clipper oil" />
+                    </x-field>
+
+                    <x-field label="Cost (₱)" for="expense-cost" errorName="cost">
+                        <x-input id="expense-cost" type="number" name="cost" step="0.01" min="0" required placeholder="0.00" />
+                    </x-field>
+
+                    <x-field label="Date" for="expense-date" errorName="expense_date">
+                        <x-input id="expense-date" type="date" name="expense_date" value="{{ now()->toDateString() }}" required />
+                    </x-field>
+                </div>
+
+                <x-field label="Notes" for="expense-notes" hint="Optional — where it was bought, size, receipt no.">
+                    <x-textarea id="expense-notes" name="notes" rows="3" placeholder="Add a note…" class="w-full"></x-textarea>
                 </x-field>
 
-                <x-field label="Cost (₱)" for="expense-cost" errorName="cost">
-                    <x-input id="expense-cost" type="number" name="cost" step="0.01" min="0" required placeholder="0.00" />
-                </x-field>
-
-                <x-field label="Date" for="expense-date" errorName="expense_date">
-                    <x-input id="expense-date" type="date" name="expense_date" value="{{ now()->toDateString() }}" required />
-                </x-field>
-            </div>
-
-            <x-field label="Notes" for="expense-notes" hint="Optional — where it was bought, size, receipt no.">
-                <x-textarea id="expense-notes" name="notes" rows="3" placeholder="Add a note…" class="w-full"></x-textarea>
-            </x-field>
-
-            <div class="flex justify-end">
-                <x-btn variant="accent" type="submit" class="w-full py-2.5 sm:w-auto">Log expense</x-btn>
-            </div>
-        </form>
-    </x-panel>
+                <div class="flex justify-end">
+                    <x-btn variant="accent" type="submit" class="w-full py-2.5 sm:w-auto">Save expense</x-btn>
+                </div>
+            </form>
+        </x-panel>
+    </div>
 
     {{-- Expense ledger --}}
     <x-panel title="Expenses" :subtitle="'All item costs logged in this '.$period.' period.'" bodyClass="p-6"

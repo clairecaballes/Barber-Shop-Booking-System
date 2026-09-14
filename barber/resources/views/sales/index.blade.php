@@ -41,10 +41,10 @@
 
         <div class="relative flex flex-wrap items-end justify-between gap-6 p-6">
             <div>
-                <p class="text-xs font-semibold text-muted">Net take, all time</p>
+                <p class="text-xs font-semibold text-muted">Net Total</p>
                 <p class="numeral mt-3 text-4xl font-semibold text-ink">{{ money($metrics['net_sales']) }}</p>
                 <p class="numeral mt-2 text-xs text-muted">
-                    {{ money($metrics['overall_sales']) }} taken &minus; {{ money($metrics['expenses_overall']) }} in item costs
+                    {{ money($metrics['overall_sales']) }} profit &minus; {{ money($metrics['expenses_overall']) }} in item costs
                 </p>
             </div>
 
@@ -72,22 +72,7 @@
     </section>
 
     {{-- Monthly schedule export --}}
-    <x-panel title="Monthly schedule" subtitle="Exports a dark schedule sheet you can send straight to the shop phone."
-             x-data="{ month: '{{ now()->format('Y-m') }}' }" bodyClass="p-6">
-        <x-slot:actions>
-            <x-field label="Month">
-                <x-input type="month" x-model="month" x-on:change="month = $event.target.value" />
-            </x-field>
-            <x-btn variant="accent" x-on:click="downloadSchedule(month)" class="self-end">
-                <x-icon name="download" class="h-4 w-4" />
-                Download image
-            </x-btn>
-        </x-slot:actions>
-
-        <div id="monthly-schedule" class="bento-sunken p-5 text-sm text-muted">
-            Pick a month and export the schedule.
-        </div>
-    </x-panel>
+    
 </div>
 
 @push('scripts')
