@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToShop;
 use Database\Factories\BusinessSettingFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['key', 'value'])]
+#[Fillable(['user_id', 'key', 'value'])]
 class BusinessSetting extends Model
 {
     /** @use HasFactory<BusinessSettingFactory> */
+    use BelongsToShop;
+
     use HasFactory;
 
     protected function casts(): array

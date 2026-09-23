@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToShop;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['date', 'reason', 'start_time', 'end_time'])]
+#[Fillable(['user_id', 'date', 'reason', 'start_time', 'end_time'])]
 class BlockedSlot extends Model
 {
+    use BelongsToShop;
+
     protected function casts(): array
     {
         return [

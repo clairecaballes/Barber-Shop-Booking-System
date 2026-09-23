@@ -7,7 +7,10 @@ use Illuminate\Database\Seeder;
 
 class SettingsSeeder extends Seeder
 {
-    public function run(): void
+    /**
+     * @param  int  $userId  the account that owns the seeded settings
+     */
+    public function run(?int $userId = null): void
     {
         $settings = [
             'shop_name' => 'My Barber Shop',
@@ -26,7 +29,7 @@ class SettingsSeeder extends Seeder
 
         foreach ($settings as $key => $value) {
             BusinessSetting::updateOrCreate(
-                ['key' => $key],
+                ['user_id' => $userId, 'key' => $key],
                 ['value' => $value]
             );
         }

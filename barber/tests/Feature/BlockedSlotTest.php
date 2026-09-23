@@ -54,6 +54,8 @@ class BlockedSlotTest extends TestCase
         $user = $this->owner();
         $date = now()->addDays(3)->toDateString();
 
+        $this->actingAs($user);
+
         BlockedSlot::create(['date' => $date]);
 
         $this->actingAs($user)
@@ -65,6 +67,8 @@ class BlockedSlotTest extends TestCase
     {
         $user = $this->owner();
         $date = now()->addDays(3)->toDateString();
+
+        $this->actingAs($user);
 
         BlockedSlot::create(['date' => $date, 'reason' => 'Barber on leave']);
 
@@ -82,6 +86,9 @@ class BlockedSlotTest extends TestCase
     public function test_no_slots_available_on_blocked_day(): void
     {
         $user = $this->owner();
+
+        $this->actingAs($user);
+
         $service = Service::factory()->create(['active' => true]);
         $date = now()->addDays(3)->toDateString();
 
@@ -97,6 +104,9 @@ class BlockedSlotTest extends TestCase
     public function test_booking_on_blocked_day_is_rejected(): void
     {
         $user = $this->owner();
+
+        $this->actingAs($user);
+
         $customer = Customer::factory()->create();
         $service = Service::factory()->create(['active' => true]);
         $date = now()->addDays(3)->toDateString();
@@ -136,6 +146,9 @@ class BlockedSlotTest extends TestCase
     public function test_block_defaults_to_operating_hours_when_times_omitted(): void
     {
         $user = $this->owner();
+
+        $this->actingAs($user);
+
         $this->openEveryDay();
         $date = now()->addDays(3)->toDateString();
 
@@ -153,6 +166,9 @@ class BlockedSlotTest extends TestCase
     public function test_booking_outside_leave_window_is_still_allowed(): void
     {
         $user = $this->owner();
+
+        $this->actingAs($user);
+
         $this->openEveryDay();
         $service = Service::factory()->create(['active' => true, 'duration' => 60]);
         $date = now()->addDays(3)->toDateString();
@@ -178,6 +194,9 @@ class BlockedSlotTest extends TestCase
     public function test_booking_inside_leave_window_is_rejected(): void
     {
         $user = $this->owner();
+
+        $this->actingAs($user);
+
         $this->openEveryDay();
         $customer = Customer::factory()->create();
         $service = Service::factory()->create(['active' => true, 'duration' => 60]);
@@ -204,6 +223,8 @@ class BlockedSlotTest extends TestCase
         $user = $this->owner();
         $date = now()->addDays(3)->toDateString();
 
+        $this->actingAs($user);
+
         BlockedSlot::create([
             'date' => $date,
             'reason' => 'Barber on leave',
@@ -229,6 +250,9 @@ class BlockedSlotTest extends TestCase
     {
         $user = $this->owner();
         $date = now()->addDays(3)->toDateString();
+
+        $this->actingAs($user);
+
         $block = BlockedSlot::create(['date' => $date]);
 
         $this->actingAs($user)
@@ -243,6 +267,9 @@ class BlockedSlotTest extends TestCase
     {
         $user = $this->owner();
         $date = now()->addDays(3)->toDateString();
+
+        $this->actingAs($user);
+
         $block = BlockedSlot::create([
             'date' => $date,
             'start_time' => '09:00:00',
@@ -268,6 +295,9 @@ class BlockedSlotTest extends TestCase
     {
         $user = $this->owner();
         $date = now()->addDays(3)->toDateString();
+
+        $this->actingAs($user);
+
         $block = BlockedSlot::create([
             'date' => $date,
             'start_time' => '09:00:00',

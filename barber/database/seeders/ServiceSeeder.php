@@ -7,10 +7,13 @@ use Illuminate\Database\Seeder;
 
 class ServiceSeeder extends Seeder
 {
-    public function run(): void
+    /**
+     * @param  int  $userId  the account that owns the seeded service
+     */
+    public function run(?int $userId = null): void
     {
         Service::updateOrCreate(
-            ['name' => 'Haircut'],
+            ['user_id' => $userId, 'name' => 'Haircut'],
             [
                 'price' => 15000,
                 'duration' => 30,

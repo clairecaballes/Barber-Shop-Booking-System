@@ -45,6 +45,14 @@ class BookingTest extends TestCase
 
     public function test_duplicate_booking_is_rejected(): void
     {
+        $user = User::create([
+            'name' => 'Owner',
+            'email' => 'owner@test.com',
+            'password' => 'password',
+        ]);
+
+        $this->actingAs($user);
+
         $service = Service::factory()->create();
         $customer = Customer::factory()->create();
 
@@ -88,6 +96,8 @@ class BookingTest extends TestCase
             'password' => 'password',
         ]);
 
+        $this->actingAs($user);
+
         $service = Service::factory()->create(['active' => true]);
 
         $this->actingAs($user)->post(route('quick-bookings.store'), [
@@ -115,6 +125,8 @@ class BookingTest extends TestCase
             'password' => 'password',
         ]);
 
+        $this->actingAs($user);
+
         $customer = Customer::factory()->create();
         $service = Service::factory()->create(['active' => true]);
 
@@ -139,6 +151,8 @@ class BookingTest extends TestCase
             'email' => 'owner@test.com',
             'password' => 'password',
         ]);
+
+        $this->actingAs($user);
 
         $service = Service::factory()->create(['active' => true]);
 
@@ -169,6 +183,8 @@ class BookingTest extends TestCase
             'email' => 'owner@test.com',
             'password' => 'password',
         ]);
+
+        $this->actingAs($user);
 
         $customer = Customer::factory()->create(['name' => 'Test Customer']);
         $service = Service::factory()->create(['name' => 'Haircut', 'active' => true]);
@@ -202,6 +218,8 @@ class BookingTest extends TestCase
             'password' => 'password',
         ]);
 
+        $this->actingAs($user);
+
         $customer = Customer::factory()->create(['name' => 'Anna Cruz']);
         $service = Service::factory()->create(['name' => 'Beard Trim', 'active' => true]);
 
@@ -225,7 +243,7 @@ class BookingTest extends TestCase
         $this->assertEquals('#60a5fa', $events[0]['color']);
     }
 
-    public function test_bookings_and_edits_are_shared_across_accounts(): void
+    public function test_bookings_and_edits_are_isolated_per_account(): void
     {
         $owner = User::create([
             'name' => 'Owner',
@@ -239,7 +257,9 @@ class BookingTest extends TestCase
             'password' => 'password',
         ]);
 
-        $customer = Customer::factory()->create(['name' => 'Shared Customer']);
+        $this->actingAs($owner);
+
+        $customer = Customer::factory()->create(['name' => 'Owner Customer']);
         $service = Service::factory()->create(['name' => 'Haircut', 'active' => true]);
 
         Booking::create([
@@ -251,16 +271,16 @@ class BookingTest extends TestCase
             'status' => 'booked',
         ]);
 
-        // The booking created under one account is still visible after signing
-        // in with a different account: shop data is shared, not per-user.
+        // A booking created under one account must be invisible to signed-in
+        // staff: shop data is per-account, not shared.
         $this->actingAs($owner)
             ->get(route('bookings.index'))
             ->assertOk()
-            ->assertSee('Shared Customer');
+            ->assertSee('Owner Customer');
 
         $this->actingAs($staff)
             ->get(route('bookings.index'))
             ->assertOk()
-            ->assertSee('Shared Customer');
+            ->assertDontSee('Owner Customer');
     }
 }

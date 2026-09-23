@@ -15,17 +15,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            ServiceSeeder::class,
-            SettingsSeeder::class,
-        ]);
-
-        User::updateOrCreate(
+        // The owner account claims the seeded demo data so every other
+        // (freshly registered) account starts at zero.
+        $owner = User::updateOrCreate(
             ['email' => 'owner@barbershop.test'],
             [
                 'name' => 'Shop Owner',
                 'password' => 'password',
             ]
         );
+
+        (new ServiceSeeder)->run($owner->id);
+        (new SettingsSeeder)->run($owner->id);
     }
 }

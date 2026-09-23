@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToShop;
 use Database\Factories\ServiceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'price', 'duration', 'active'])]
+#[Fillable(['user_id', 'name', 'price', 'duration', 'active'])]
 class Service extends Model
 {
     /** @use HasFactory<ServiceFactory> */
+    use BelongsToShop;
+
     use HasFactory;
 
     protected function casts(): array
