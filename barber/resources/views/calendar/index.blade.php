@@ -833,54 +833,94 @@ document.addEventListener('alpine:init', () => {
             const el = document.getElementById('calendar-wrapper');
             if (!el || !window.html2canvas) return;
 
-            // Print from today to the last day of the month: hide past days and
-            // days that spill over from the previous/next month.
-            const hideStyle = document.createElement('style');
-            hideStyle.textContent = '#calendar-wrapper .fc-day-past, #calendar-wrapper .fc-day-other { visibility: hidden !important; }';
-            document.head.appendChild(hideStyle);
-
             const dark = document.documentElement.classList.contains('dark');
             const sheet = dark ? '#0b0c0f' : '#f2f3f5';
             const ink = dark ? '#f5f5f7' : '#16181d';
             const muted = dark ? '#9ca3af' : '#5f6672';
+            const hairline = dark ? 'rgba(255,255,255,0.14)' : '#d9d6dc';
+            const hairlineSoft = dark ? 'rgba(255,255,255,0.07)' : '#eceaf0';
+            const accent = dark ? '#ccff00' : '#4d7c0f';
 
             const shopName = '{{ \App\Models\BusinessSetting::get('shop_name', 'Barber Shop') }}';
             const month = this.calendarTitle || this.currentMonthLabel();
 
-            const header = document.createElement('div');
-            header.style.cssText = 'text-align:center;padding:16px 8px 12px;font-family:ui-sans-serif,system-ui,sans-serif;';
-            header.innerHTML =
-                '<h1 style="font-size:20px;font-weight:600;color:' + ink + ';margin:0;letter-spacing:-0.01em;">' + shopName + ' — schedule</h1>' +
-                '<p style="font-size:14px;color:' + muted + ';margin:6px 0 0;">' + month + '</p>';
-            el.prepend(header);
+            // Frame the live grid in a symmetric, printed-style sheet. All DOM
+            // surgery happens on html2canvas's clone only — the page is untouched.
+            const pad = 44;
+            const frameW = el.offsetWidth + pad * 2;
+            const frameH = Math.ceil(el.offsetHeight + 190);
 
-            try {
-                const canvas = await window.html2canvas(el, { backgroundColor: sheet, scale: 2 });
-                const link = document.createElement('a');
-                link.download = shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-schedule-' + month.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            } finally {
-                header.remove();
-                hideStyle.remove();
-            }
+            const canvas = await window.html2canvas(el, {
+                backgroundColor: sheet,
+                scale: 2,
+                width: frameW,
+                height: frameH,
+                windowWidth: frameW,
+                windowHeight: frameH,
+                onclone: (doc, target) => {
+                    const style = doc.createElement('style');
+                    style.textContent = '#calendar-wrapper .fc-day-past, #calendar-wrapper .fc-day-other { visibility: hidden !important; }';
+                    doc.head.appendChild(style);
+
+                    const frame = doc.createElement('div');
+                    frame.style.cssText =
+                        'position:absolute;top:0;left:0;width:' + frameW + 'px;height:' + frameH + 'px;' +
+                        'display:flex;flex-direction:column;box-sizing:border-box;' +
+                        'background:' + sheet + ';border:1px solid ' + hairline + ';padding:24px ' + pad + 'px 18px;';
+
+                    const rails =
+                        '<span style="position:absolute;top:20px;bottom:16px;left:24px;width:1px;background:' + hairline + ';"></span>'
+                        + '<span style="position:absolute;top:20px;bottom:16px;left:31px;width:1px;background:' + hairlineSoft + ';"></span>'
+                        + '<span style="position:absolute;top:20px;bottom:16px;right:24px;width:1px;background:' + hairline + ';"></span>'
+                        + '<span style="position:absolute;top:20px;bottom:16px;right:31px;width:1px;background:' + hairlineSoft + ';"></span>';
+
+                    const divider =
+                        '<div style="display:flex;align-items:center;gap:12px;">'
+                        + '<span style="flex:1;height:1px;background:' + hairline + ';"></span>'
+                        + '<span style="color:' + accent + ';font-size:13px;line-height:1;">&#9986;</span>'
+                        + '<span style="flex:1;height:1px;background:' + hairline + ';"></span>'
+                        + '</div>';
+
+                    frame.innerHTML = rails
+                        + divider
+                        + '<div style="text-align:center;padding:14px 0 0;">'
+                        + '<h1 style="margin:0;font-family:Georgia,\'Times New Roman\',serif;font-size:22px;line-height:1.2;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:' + ink + ';">' + shopName + '</h1>'
+                        + '<p style="margin:7px 0 0;font-size:12px;letter-spacing:0.06em;color:' + muted + ';">Monthly schedule for ' + month + '</p>'
+                        + '</div>'
+                        + '<div data-grid style="position:relative;flex:1;min-height:0;margin-top:14px;"></div>'
+                        + divider
+                        + '<div style="text-align:center;padding-top:14px;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:' + muted + ';">OBS \u2014 developed by JCC</div>';
+
+                    const host = target.parentNode;
+                    host.insertBefore(frame, target);
+                    frame.querySelector('[data-grid]').appendChild(target);
+                },
+            });
+
+            const link = document.createElement('a');
+            link.download = shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-schedule-' + month.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
         },
 
         async downloadScheduleList() {
             if (!window.html2canvas) return;
 
-            const dark = document.documentElement.classList.contains('dark');
-            const sheet = dark ? '#0b0c0f' : '#f2f3f5';
-            const ink = dark ? '#f5f5f7' : '#16181d';
-            const muted = dark ? '#9ca3af' : '#5f6672';
-            const line = dark ? '#2e2e33' : '#dcdcdf';
-            const accent = dark ? '#ccff00' : '#4d7c0f';
-            const danger = dark ? '#f47f7f' : '#b91c1c';
+            // A printed artifact, independent of the on-screen theme: warm
+            // paper, charcoal ink, olive-lime accents, twin symmetric rails.
+            const sheet = '#f8f6f1';
+            const ink = '#26292f';
+            const muted = '#7b8089';
+            const hairline = '#e7e2d7';
+            const hairlineSoft = 'rgba(38,41,47,0.05)';
+            const accent = '#4d5d18';
+            const danger = '#a04b3e';
 
             const shopName = '{{ \App\Models\BusinessSetting::get('shop_name', 'Barber Shop') }}';
-            const monthMatch = (this.calendarTitle || '').match(/^([A-Za-z]+)\s+\d{4}$/);
+            const monthMatch = (this.calendarTitle || '').match(/^([A-Za-z]+)\s+(\d{4})$/);
             const monthLabel = monthMatch ? monthMatch[1] : this.currentMonthLabel().split(' ')[0];
-            const monthTitle = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1) + ' Schedule';
+            const monthYear = monthMatch ? monthMatch[2] : new Date().getFullYear();
+            const periodLabel = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1) + ' ' + monthYear;
 
             const byDay = {};
             (this.calendar?.getEvents() || []).forEach(e => {
@@ -906,38 +946,55 @@ document.addEventListener('alpine:init', () => {
                 const entries = byDay[key].sort((a, b) => (a.block ? 0 : 1) - (b.block ? 0 : 1) || a.time.localeCompare(b.time));
                 const d = new Date(key + 'T00:00:00');
                 const dayLabel = d.toLocaleString('en-US', { month: 'long', day: 'numeric' });
-                const dayName = d.toLocaleString('en-US', { weekday: 'short' });
+                const dayName = d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase();
 
                 listHtml += '<div style="margin-top:18px;">';
-                listHtml += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">'
-                    + '<h3 style="margin:0;font-size:14px;font-weight:600;color:' + ink + ';">' + dayLabel + '</h3>'
-                    + '<span style="font-size:11px;color:' + muted + ';">' + dayName + '</span></div>';
+                listHtml += '<div style="display:flex;align-items:center;gap:12px;">'
+                    + '<span style="font-size:12px;font-weight:700;color:' + ink + ';">' + dayLabel + '</span>'
+                    + '<span style="flex:1;height:1px;background:' + hairline + ';"></span>'
+                    + '<span style="font-size:9px;letter-spacing:0.18em;color:' + muted + ';">' + dayName + '</span></div>';
                 entries.forEach(en => {
                     if (en.block) {
-                        listHtml += '<div style="margin-top:6px;font-size:13px;font-weight:700;color:' + danger + ';">' + en.label + '</div>';
+                        listHtml += '<div style="margin-top:10px;padding-left:64px;font-size:12.5px;font-style:italic;font-weight:600;color:' + danger + ';">' + en.label + '</div>';
                     } else {
-                        listHtml += '<div style="margin-top:6px;display:flex;align-items:baseline;gap:8px;">'
-                            + '<span style="font-family:ui-monospace,monospace;font-size:12px;color:' + accent + ';min-width:70px;">' + en.time + '</span>'
-                            + '<span style="font-size:13px;color:' + ink + ';">' + en.label + '</span>'
-                            + '<span style="margin-left:auto;font-size:11px;color:' + muted + ';">' + en.status + '</span></div>';
+                        listHtml += '<div style="margin-top:10px;display:flex;align-items:baseline;gap:12px;">'
+                            + '<span style="font-family:ui-monospace,SFMono-Regular,monospace;font-size:11.5px;font-weight:600;color:' + accent + ';min-width:64px;">' + en.time + '</span>'
+                            + '<span style="flex:1;font-size:13px;color:' + ink + ';">' + en.label + '</span>'
+                            + (en.status ? '<span style="font-size:9px;letter-spacing:0.18em;color:' + muted + ';">' + en.status.toUpperCase() + '</span>' : '') + '</div>';
                     }
                 });
                 listHtml += '</div>';
             });
 
+            const scissors = '<span style="color:' + accent + ';font-size:13px;line-height:1;">&#9986;</span>';
+            const divider =
+                '<div style="display:flex;align-items:center;gap:12px;margin:20px 0 2px;">'
+                + '<span style="flex:1;height:1px;background:' + hairline + ';"></span>'
+                + scissors
+                + '<span style="flex:1;height:1px;background:' + hairline + ';"></span>'
+                + '</div>';
+
+            const rails =
+                '<span style="position:absolute;top:24px;bottom:28px;left:22px;width:1px;background:' + hairline + ';"></span>'
+                + '<span style="position:absolute;top:24px;bottom:28px;left:30px;width:1px;background:' + hairlineSoft + ';"></span>'
+                + '<span style="position:absolute;top:24px;bottom:28px;right:22px;width:1px;background:' + hairline + ';"></span>'
+                + '<span style="position:absolute;top:24px;bottom:28px;right:30px;width:1px;background:' + hairlineSoft + ';"></span>';
+
             const node = document.createElement('div');
             node.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + Math.min(430, window.innerWidth) + 'px;z-index:-1;';
             node.innerHTML =
-                '<div style="display:flex;flex-direction:column;min-height:820px;font-family:Georgia,\'Times New Roman\',serif;background:' + sheet + ';color:' + ink + ';padding:26px 22px 18px;border-radius:24px;border:1px solid ' + line + ';box-shadow:0 18px 40px rgba(15,23,42,0.08);">'
-                + '<div style="text-align:center;padding-bottom:12px;border-bottom:1px solid ' + line + ';">'
-                + '<h1 style="margin:0;font-size:30px;line-height:1.1;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#3b2001;">' + shopName + '</h1>'
-                + '<p style="margin:8px 0 0;font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:#3b2001;font-weight:700;">care in every cut.</p>'
+                '<div style="position:relative;box-sizing:border-box;display:flex;flex-direction:column;min-height:820px;font-family:ui-sans-serif,system-ui,sans-serif;background:' + sheet + ';color:' + ink + ';padding:30px 44px 20px;border:1px solid #cfc8b8;border-radius:2px;box-shadow:0 20px 44px rgba(20,20,28,0.12);">'
+                + rails
+                + '<div style="text-align:center;padding-top:22px;border-top:1px solid ' + hairline + ';">'
+                + '<h1 style="margin:0;font-family:Georgia,\'Times New Roman\',serif;font-size:29px;line-height:1.15;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:' + ink + ';">' + shopName + '</h1>'
+                + '<p style="margin:9px 0 0;font-size:12px;letter-spacing:0.06em;color:' + muted + ';">Monthly schedule for ' + periodLabel + '</p>'
                 + '</div>'
-                + '<h3 style="margin:18px auto 0;text-align:center;font-size:22px;line-height:1.1;font-weight:700;letter-spacing:0.04em;color:' + ink + ';font-family:Georgia,\'Times New Roman\',serif;text-transform:uppercase;white-space:nowrap;">' + monthTitle + '</h3>'
-                + '<div style="display:flex;flex:1;flex-direction:column;justify-content:flex-start;padding-top:14px;font-family:ui-sans-serif,system-ui,sans-serif;">'
-                + (listHtml || '<p style="margin:0;font-size:13px;color:' + muted + ';">No bookings scheduled for this month.</p>')
+                + divider
+                + '<div style="flex:1;">'
+                + (listHtml || '<p style="margin:26px 0 0;text-align:center;font-size:13px;font-style:italic;color:' + muted + ';">No bookings scheduled for this month.</p>')
                 + '</div>'
-                + '<div style="margin-top:auto;padding-top:14px;border-top:1px solid ' + line + ';text-align:center;font-size:11px;letter-spacing:0.12em;color:' + muted + ';font-family:ui-sans-serif,system-ui,sans-serif;">OBS developed by JCC</div>'
+                + divider
+                + '<div style="text-align:center;padding-top:18px;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:' + muted + ';">OBS \u2014 developed by JCC</div>'
                 + '</div>';
             document.body.appendChild(node);
 
