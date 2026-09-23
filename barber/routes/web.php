@@ -49,6 +49,8 @@ Route::middleware('auth')->group(function () {
     // Calendar
     Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
     Route::post('calendar/blocked-slots', [BlockedSlotController::class, 'store'])->name('calendar.blocks.store');
+    Route::patch('calendar/blocked-slots/{blockedSlot}', [BlockedSlotController::class, 'update'])->name('calendar.blocks.update');
+    Route::delete('calendar/blocked-slots/{blockedSlot}', [BlockedSlotController::class, 'destroy'])->name('calendar.blocks.destroy');
 
     // Quick Booking
     Route::get('quick-bookings', [QuickBookingController::class, 'index'])->name('quick-bookings.index');

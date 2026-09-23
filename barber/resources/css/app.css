@@ -21,27 +21,36 @@
    The canonical finish is the dark shop: charcoal panels, hairline white
    strokes, and electric lime held to a small slice of the screen. The light
    theme is a daylight counterpart for desk work, using a deeper lime that
-   still clears contrast on white.
+   still clears contrast on white. Tones lean slightly cool-charcoal so the
+   accent reads surgical rather than neon-on-black.
 --------------------------------------------------------------------------- */
 
 :root {
-    --page: #f4f4f5;
+    --page: #f2f3f5;
     --rail: #ffffff;
     --surface: #ffffff;
     --surface-hi: #ffffff;
-    --surface-sunken: #f4f4f5;
+    --surface-sunken: #eef0f3;
     --stroke: rgba(24, 24, 27, 0.08);
     --stroke-strong: rgba(24, 24, 27, 0.16);
-    --ink: #18181b;
-    --muted: #71717a;
+    --ink: #16181d;
+    --muted: #5f6672;
     --accent: #4d7c0f;
     --accent-hi: #65a30d;
     --accent-ink: #ffffff;
     --accent-soft: rgba(77, 124, 15, 0.1);
     --accent-line: rgba(77, 124, 15, 0.4);
     --accent-glow: rgba(77, 124, 15, 0.28);
-    --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.06);
-    --shadow-lg: 0 18px 40px -26px rgba(24, 24, 27, 0.4);
+    --shadow-sm:
+        0 1px 2px rgba(24, 24, 27, 0.06),
+        0 6px 14px -8px rgba(24, 24, 27, 0.14);
+    --shadow-lg:
+        0 20px 44px -26px rgba(24, 24, 27, 0.45),
+        0 8px 18px -12px rgba(24, 24, 27, 0.18);
+    --shadow-elev:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 1px 2px rgba(24, 24, 27, 0.08),
+        0 14px 30px -18px rgba(24, 24, 27, 0.32);
     --inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
     --step-shadow: rgba(24, 24, 27, 0.2);
     --step-glow: rgba(24, 24, 27, 0.38);
@@ -59,8 +68,8 @@
     --rail-accent-glow: rgba(204, 255, 0, 0.22);
 
     /* Booking statuses, tuned for a white surface. */
-    --st-pending: #b45309;
-    --st-booked: #1d4ed8;
+    --st-pending: #a16207;
+    --st-booked: #2563eb;
     --st-completed: #4d7c0f;
     --st-cancelled: #b91c1c;
     --st-noshow: #c2410c;
@@ -70,33 +79,41 @@
 .dark {
     color-scheme: dark;
 
-    --page: #121212;
-    --rail: #18181b;
-    --surface: #1e1e1e;
-    --surface-hi: #26262a;
-    --surface-sunken: #141416;
+    --page: #0b0c0f;
+    --rail: #15161b;
+    --surface: #191b21;
+    --surface-hi: #22252c;
+    --surface-sunken: #0f1013;
     --stroke: rgba(255, 255, 255, 0.08);
     --stroke-strong: rgba(255, 255, 255, 0.16);
-    --ink: #f4f4f5;
-    --muted: #a1a1aa;
+    --ink: #f5f5f7;
+    --muted: #9ca3af;
     --accent: #ccff00;
     --accent-hi: #a3e635;
     --accent-ink: #121212;
     --accent-soft: rgba(204, 255, 0, 0.12);
     --accent-line: rgba(204, 255, 0, 0.38);
     --accent-glow: rgba(204, 255, 0, 0.22);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.6);
-    --shadow-lg: 0 26px 60px -30px rgba(0, 0, 0, 0.95);
+    --shadow-sm:
+        0 1px 2px rgba(0, 0, 0, 0.5),
+        0 5px 12px -6px rgba(0, 0, 0, 0.55);
+    --shadow-lg:
+        0 26px 60px -28px rgba(0, 0, 0, 0.95),
+        0 8px 20px -12px rgba(0, 0, 0, 0.7);
+    --shadow-elev:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 1px 2px rgba(0, 0, 0, 0.6),
+        0 16px 34px -20px rgba(0, 0, 0, 0.9);
     --inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
     --step-shadow: rgba(0, 0, 0, 0.65);
     --step-glow: rgba(0, 0, 0, 0.9);
 
     /* Booking statuses, tuned for charcoal. */
-    --st-pending: #f0b429;
-    --st-booked: #60a5fa;
+    --st-pending: #f3c14b;
+    --st-booked: #6ea8fe;
     --st-completed: #ccff00;
-    --st-cancelled: #f87171;
-    --st-noshow: #fb923c;
+    --st-cancelled: #f47f7f;
+    --st-noshow: #f6a362;
     --st-blocked: #71717a;
 }
 
@@ -127,6 +144,8 @@
     body {
         background-color: var(--page);
         color: var(--ink);
+        background-image: radial-gradient(120% 60% at 50% 0%, var(--accent-soft), transparent 55%);
+        background-repeat: no-repeat;
     }
 
     ::selection {
@@ -166,14 +185,16 @@
     /* --- Surfaces ---------------------------------------------------------
        A bento tile: one hairline stroke, a soft top-lit gradient, a deep
        dropped shadow, and a faint inner highlight so the panel reads as a
-       milled slab rather than a flat rectangle.
+       milled slab rather than a flat rectangle. The drop is now layered —
+       a crisp near shadow plus a long ambient bloom — for real perceived
+       height instead of a single flat blur.
     ---------------------------------------------------------------------- */
     .bento {
         position: relative;
         border: 1px solid var(--stroke);
         border-radius: var(--radius-bento);
-        background-image: linear-gradient(180deg, var(--surface-hi) 0%, var(--surface) 42%);
-        box-shadow: var(--shadow-lg), var(--inner-glow);
+        background-image: linear-gradient(180deg, var(--surface-hi) 0%, var(--surface) 46%);
+        box-shadow: var(--shadow-elev);
     }
 
     .bento-sunken {
@@ -184,19 +205,20 @@
     }
 
     .bento-hover {
-        transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+        transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
     }
 
     .bento-hover:hover {
         border-color: var(--accent-line);
-        box-shadow: var(--shadow-lg), var(--inner-glow), 0 0 0 1px var(--accent-soft);
+        box-shadow: var(--shadow-elev), var(--inner-glow), 0 0 0 1px var(--accent-soft);
+        transform: translateY(-1px);
     }
 
     /* A tile that carries the accent: lime hairline plus a lime bloom under
        the bottom edge. Reserve for the one number that matters on a screen. */
     .bento-lit {
         border-color: var(--accent-line);
-        box-shadow: var(--shadow-lg), var(--inner-glow), 0 18px 45px -32px var(--accent-glow);
+        box-shadow: var(--shadow-elev), 0 18px 45px -32px var(--accent-glow);
     }
 
     /* Raised tiles: the card gets visible physical thickness (a crisp step
@@ -227,13 +249,13 @@
     .bento-wash {
         background-image:
             radial-gradient(140% 100% at 100% 0%, var(--accent-soft), transparent 55%),
-            linear-gradient(180deg, var(--surface-hi) 0%, var(--surface) 42%);
+            linear-gradient(180deg, var(--surface-hi) 0%, var(--surface) 46%);
     }
 
     /* Lift: hover pops the tile off the desk and lets the accent glow catch
        the underside. */
     .bento-lift {
-        transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+        transition: transform 200ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 200ms ease, border-color 200ms ease;
     }
 
     .bento-lift:hover {
@@ -252,6 +274,41 @@
             0 1px 2px rgba(0, 0, 0, 0.08),
             0 7px 0 -1px var(--step-shadow),
             0 26px 56px -22px var(--accent-glow);
+    }
+
+    /* Frosted glass: translucent surface with a real blur, for anything that
+       floats above the page — modals, menus, the day key. Overrides the
+       opaque bento gradient so the blur actually shows behind the card. */
+    .glass {
+        background-image: linear-gradient(
+            180deg,
+            color-mix(in oklab, var(--surface-hi) 74%, transparent),
+            color-mix(in oklab, var(--surface) 62%, transparent)
+        ) !important;
+        backdrop-filter: blur(20px) saturate(1.5);
+        -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    }
+
+    /* A lighter take on the frosted modal: the surface is lifted toward
+       white and carried at higher opacity, so cards float a few steps off
+       the scrim instead of sinking into it. Used for the calendar modals. */
+    .glass-lite {
+        background-color: var(--surface);
+        background-image: linear-gradient(
+            180deg,
+            color-mix(in oklab, color-mix(in oklab, var(--surface-hi) 70%, white) 94%, transparent),
+            color-mix(in oklab, color-mix(in oklab, var(--surface) 62%, white) 88%, transparent)
+        ) !important;
+        backdrop-filter: blur(24px) saturate(1.6);
+        -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    }
+
+    /* Modal cards: fall back to vh on older iOS (support for svh landed in
+       15.4), then upgrade to the dynamic small-viewport unit when it exists
+       so the card always fits under the phone's browser chrome. */
+    .modal-card {
+        max-height: calc(100vh - 2rem);
+        max-height: calc(100svh - 2rem);
     }
 
     /* An accent hairline fires along the top edge of a neutral tile. */
@@ -303,12 +360,16 @@
         font-weight: 600;
         line-height: 1.25rem;
         white-space: nowrap;
-        transition: filter 140ms ease, border-color 140ms ease, background-color 140ms ease;
+        transition: all 200ms cubic-bezier(0.22, 0.61, 0.36, 1);
     }
 
     .btn:disabled {
         opacity: 0.55;
         pointer-events: none;
+    }
+
+    .btn:active {
+        transform: translateY(1px) scale(0.98);
     }
 
     /* Polished lime: bright crown, darker skirt, hairline highlight. */
@@ -320,7 +381,9 @@
     }
 
     .btn-accent:hover {
-        filter: brightness(1.06);
+        filter: brightness(1.07);
+        transform: translateY(-1px);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 14px 30px -14px var(--accent-glow);
     }
 
     /* Floating action button: lime disc with a soft halo + idle pulse. */
@@ -376,11 +439,14 @@
     .btn-metal:hover {
         border-color: var(--accent-line);
         color: var(--ink);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 20px -12px var(--step-glow);
     }
 
     .btn-ghost {
         color: var(--muted);
         border: 1px solid transparent;
+        background-color: transparent;
     }
 
     .btn-ghost:hover {
@@ -410,7 +476,7 @@
         font-size: 0.875rem;
         line-height: 1.35rem;
         box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
-        transition: border-color 140ms ease, box-shadow 140ms ease;
+        transition: all 200ms ease;
     }
 
     .field::placeholder {
@@ -427,6 +493,17 @@
         opacity: 0.55;
     }
 
+    /* iPhone/iOS Safari auto-zooms into any text control whose font is
+       smaller than 16px. Sizing fields up on small screens kills that so
+       the form stays put while typing. */
+    @media (max-width: 639.98px) {
+        .field,
+        .calendar-month-control {
+            font-size: 1rem;
+            line-height: 1.45rem;
+        }
+    }
+
     /* Native pickers need a dark glyph on dark surfaces. */
     .dark input[type='date'],
     .dark input[type='time'],
@@ -436,9 +513,9 @@
 
     .calendar-month-control {
         display: block;
-        min-width: 10rem;
-        height: 2.25rem;
-        border-radius: 0.65rem;
+        min-width: 11rem;
+        height: 2.5rem;
+        border-radius: 0.75rem;
         border: 1px solid var(--stroke);
         background-color: var(--surface-sunken);
         color: var(--ink);
@@ -447,7 +524,12 @@
         font-weight: 600;
         line-height: 1.25rem;
         box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
-        transition: border-color 140ms ease, box-shadow 140ms ease;
+        transition: all 200ms ease;
+        cursor: pointer;
+    }
+
+    .calendar-month-control:hover {
+        border-color: var(--stroke-strong);
     }
 
     .calendar-month-control:focus {
@@ -488,6 +570,12 @@
         padding: 0.125rem 0.6rem;
         font-size: 0.6875rem;
         font-weight: 600;
+        transition: all 200ms ease;
+    }
+
+    .chip:hover {
+        border-color: var(--accent-line);
+        background-color: var(--accent-soft);
     }
 
     /* --- Rail navigation --------------------------------------------------
@@ -519,12 +607,13 @@
         font-size: 0.875rem;
         font-weight: 500;
         color: var(--rail-muted);
-        transition: color 140ms ease, background-color 140ms ease;
+        transition: all 200ms cubic-bezier(0.22, 0.61, 0.36, 1);
     }
 
     .rail-item:hover {
         color: var(--rail-ink);
         background-color: rgba(255, 255, 255, 0.04);
+        transform: translateX(2px);
     }
 
     .rail-node {
@@ -540,7 +629,7 @@
         border: 1px solid var(--rail-stroke);
         background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent);
         color: inherit;
-        transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+        transition: all 200ms ease;
     }
 
     .rail-item-active {
@@ -558,22 +647,24 @@
     /* Segmented view switcher on chrome. */
     .view-tab {
         border-radius: 0.55rem;
-        padding: 0.35rem 0.7rem;
+        padding: 0.4rem 0.8rem;
         font-size: 0.75rem;
         font-weight: 600;
         color: var(--rail-muted);
-        transition: color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+        transition: all 200ms cubic-bezier(0.22, 0.61, 0.36, 1);
+        cursor: pointer;
     }
 
     .view-tab:hover {
         color: var(--rail-ink);
+        background-color: rgba(255, 255, 255, 0.04);
     }
 
     /* Lit by brightness rather than by lime, so the accent stays on the CTAs. */
     .view-tab.is-active {
         color: var(--rail-ink);
         background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06));
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 4px 12px -6px rgba(0, 0, 0, 0.6);
     }
 
     /* --- Gauges -----------------------------------------------------------
@@ -602,7 +693,7 @@
         border-radius: 0.4rem 0.4rem 0.15rem 0.15rem;
         background-image: linear-gradient(180deg, var(--accent-hi) 0%, var(--accent) 100%);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 24px -14px var(--accent-glow);
-        transition: filter 160ms ease, transform 160ms ease;
+        transition: filter 200ms ease, transform 200ms ease;
     }
 
     .bar:hover {
@@ -631,6 +722,18 @@
         display: table-header-group;
     }
 
+    .resp-table thead th {
+        padding-top: 0.55rem;
+        padding-bottom: 0.55rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-size: 0.6875rem;
+    }
+
+    .resp-table tbody tr {
+        transition: background-color 200ms ease;
+    }
+
     @media (max-width: 639px) {
         .resp-table,
         .resp-table tbody,
@@ -646,7 +749,7 @@
 
         .resp-table tbody {
             display: grid;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         .resp-table tbody tr {
@@ -655,7 +758,7 @@
             border: 1px solid var(--stroke);
             border-radius: var(--radius-tile);
             background-image: linear-gradient(180deg, var(--surface-hi) 0%, var(--surface) 42%);
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-sm), var(--inner-glow);
         }
 
         .resp-table tbody tr.resp-complete {
@@ -768,51 +871,207 @@
         }
     }
 
-    /* --- Calendar --------------------------------------------------------- */
+    /* --- Calendar ---------------------------------------------------------
+       The board is a floating slab, not a spreadsheet: hairline strokes for
+       the grid, gradient-lit active day, closer type on col headers, pill
+       badges for events, and a distinct quiet treatment for weekends.
+    ---------------------------------------------------------------------- */
     .fc {
         --fc-border-color: var(--stroke);
         --fc-page-bg-color: transparent;
         --fc-neutral-bg-color: var(--surface-sunken);
-        --fc-today-bg-color: var(--accent-soft);
+        --fc-today-bg-color: transparent;
         --fc-now-indicator-color: var(--accent);
+        --fc-highlight-color: var(--accent-soft);
         font-size: 0.8125rem;
         color: var(--ink);
     }
 
-    .fc .fc-toolbar-title,
-    .fc .fc-col-header-cell-cushion {
-        font-weight: 600;
-        color: var(--ink);
+    /* Column headers: small-caps weekday type; weekends read quieter and in
+       a slightly italic hand so the week's rhythm is legible at a glance. */
+    .fc .fc-col-header-cell {
+        border-color: var(--stroke);
+        background-color: color-mix(in oklab, var(--surface-sunken) 30%, transparent);
     }
 
-    .fc .fc-col-header-cell-cushion,
-    .fc .fc-daygrid-day-number {
+    .fc .fc-col-header-cell-cushion {
+        padding: 0.65rem 0.35rem;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
         color: var(--muted);
-        padding: 0.5rem;
+        transition: color 200ms ease;
+    }
+
+    .fc .fc-col-header-cell.fc-day-sat,
+    .fc .fc-col-header-cell.fc-day-sun {
+        background-color: color-mix(in oklab, var(--stroke) 45%, transparent);
+    }
+
+    .fc .fc-col-header-cell.fc-day-sat .fc-col-header-cell-cushion,
+    .fc .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion {
+        color: color-mix(in oklab, var(--muted) 78%, var(--accent));
+        font-style: italic;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+    }
+
+    /* Day numbers: calm on weekdays, quieter on weekends, and a lit lime
+       goggle on today. */
+    .fc .fc-daygrid-day-number {
+        font-size: 0.8125rem;
+        font-weight: 650;
+        color: var(--muted);
+        padding: 0.55rem 0.6rem 0 0;
+        transition: all 200ms ease;
+    }
+
+    .fc .fc-daygrid-day.fc-day-sat .fc-daygrid-day-number,
+    .fc .fc-daygrid-day.fc-day-sun .fc-daygrid-day-number {
+        color: color-mix(in oklab, var(--muted) 70%, transparent);
+        font-weight: 600;
+        font-style: italic;
+    }
+
+    /* Today: a soft lime wash falling down the cell with a lit hairline on
+       the top edge, so the day glows instead of being painted flat. */
+    .fc .fc-daygrid-day.fc-day-today,
+    .fc .fc-timegrid-col.fc-day-today {
+        background-image: radial-gradient(120% 90% at 50% 0%, var(--accent-soft), transparent 70%);
+    }
+
+    .fc .fc-timegrid-col.fc-day-today .fc-timegrid-axis-frame {
+        box-shadow: inset 2px 0 0 var(--accent);
     }
 
     .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
         color: var(--accent-ink);
         background-color: var(--accent);
         border-radius: 999px;
-        padding: 0.15rem 0.5rem;
+        margin-right: 0.5rem;
+        margin-top: 0.4rem;
+        padding: 0.15rem 0.55rem;
+        box-shadow: 0 4px 16px -6px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     }
 
-    .fc .fc-daygrid-event,
-    .fc .fc-timegrid-event {
-        border-radius: 0.5rem;
-        border: 0;
-        padding: 1px 4px;
-        font-weight: 600;
+    /* Hovering a day lifts a faint accent wash so cells feel tappable. */
+    .fc .fc-daygrid-day:hover {
+        background-color: color-mix(in oklab, var(--accent-soft) 60%, transparent);
+    }
+
+    .fc .fc-daygrid-day:hover .fc-daygrid-day-number {
+        color: var(--ink);
     }
 
     .fc .fc-day-other {
-        opacity: 0.45;
+        opacity: 0.42;
     }
 
+    .fc .fc-day-other.fc-daygrid-day:hover {
+        background-color: transparent;
+    }
+
+    /* Events: pill badges with a light crown, a soft drop, and a small lift
+       on hover so each is a tappable token rather than a flat colored bar. */
+    .fc .fc-event {
+        border: 0;
+        padding: 0.1rem 0.55rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.005em;
+        border-radius: 999px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 2px 6px -2px rgba(0, 0, 0, 0.45);
+        background-image: linear-gradient(180deg, color-mix(in oklab, #ffffff 14%, transparent), transparent 60%);
+        transition: transform 200ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 200ms ease, filter 200ms ease;
+        cursor: pointer;
+    }
+
+    .fc .fc-event:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.06);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 18px -8px var(--step-glow),
+            0 0 0 1px var(--accent-line);
+    }
+
+    .fc a.fc-event {
+        text-decoration: none;
+    }
+
+    .fc .fc-event-title {
+        font-weight: 650;
+    }
+
+    .fc .fc-event-time {
+        font-weight: 700;
+        opacity: 0.85;
+    }
+
+    /* Compact day view: events become rounded slabs so the time column reads. */
+    .fc .fc-timegrid-event {
+        padding: 2px 6px;
+        border-radius: 0.6rem;
+    }
+
+    .fc .fc-timegrid-event:hover {
+        transform: scale(1.015);
+    }
+
+    /* "more" link becomes a quiet pill chip. */
+    .fc .fc-daygrid-more-link {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 0.12rem 0.5rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: var(--muted);
+        transition: all 200ms ease;
+    }
+
+    .fc .fc-daygrid-more-link:hover {
+        background-color: var(--accent-soft);
+        color: var(--ink);
+    }
+
+    /* The board itself: rounded slab with a recessed, hairline-in-set well. */
     .fc .fc-scrollgrid {
         border-radius: var(--radius-tile);
         overflow: hidden;
+        box-shadow: inset 0 0 0 1px var(--stroke), var(--shadow-sm);
+    }
+
+    .fc .fc-scrollgrid td {
+        border-color: var(--stroke);
+    }
+
+    .fc .fc-scrollgrid-section > td {
+        border-bottom: 1px solid var(--stroke);
+    }
+
+    /* The little now-line. */
+    .fc .fc-timegrid-now-indicator-line {
+        border-color: var(--accent);
+    }
+
+    .fc .fc-timegrid-now-indicator-arrow {
+        border-top-color: var(--accent);
+    }
+
+    .fc .fc-timegrid-slot {
+        height: 3.25rem;
+    }
+
+    .fc .fc-timegrid-axis-cushion {
+        font-size: 0.6875rem;
+        letter-spacing: 0.03em;
+        color: var(--muted);
+    }
+
+    /* Selection highlight across the grid. */
+    .fc .fc-highlight {
+        opacity: 0.5;
     }
 
     /* Pagination picks up the same strokes and lit active state. */
@@ -828,7 +1087,14 @@
     }
 
     .bento-hover,
-    .bar {
+    .bento-lift,
+    .bar,
+    .btn,
+    .rail-item,
+    .view-tab,
+    .fc .fc-event,
+    .fc .fc-daygrid-day-number,
+    .fc .fc-daygrid-more-link {
         transition: none;
     }
 }

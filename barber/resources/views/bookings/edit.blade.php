@@ -4,6 +4,17 @@
 @section('content')
 <div class="mx-auto max-w-lg" x-data="editBooking()" x-init="init()">
     <x-panel title="Edit booking #{{ $booking->id }}" subtitle="Moving the slot re-checks the chair for overlaps." bodyClass="p-6">
+        <x-slot name="actions">
+            <form method="POST" action="{{ route('bookings.destroy', $booking) }}"
+                  onsubmit="return confirm('Delete this booking? This cannot be undone. It is removed from the calendar too.');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger px-3 py-1.5 text-xs" title="Delete this booking">
+                    <x-icon name="trash" class="h-4 w-4" />
+                    Delete
+                </button>
+            </form>
+        </x-slot>
         <form method="POST" action="{{ route('bookings.update', $booking) }}" class="space-y-5">
             @csrf
             @method('PATCH')
@@ -47,9 +58,9 @@
             </x-field>
 
             <div class="flex justify-end gap-2 border-t border-line pt-5">
-                <x-btn variant="ghost" :href="route('bookings.index')">Cancel</x-btn>
-                <x-btn variant="accent" type="submit">Save changes</x-btn>
-            </div>
+                    <x-btn variant="ghost" :href="route('bookings.index')">Cancel</x-btn>
+                    <x-btn variant="accent" type="submit">Save changes</x-btn>
+                </div>
         </form>
     </x-panel>
 </div>

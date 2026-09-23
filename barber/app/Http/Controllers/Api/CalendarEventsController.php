@@ -65,18 +65,30 @@ class CalendarEventsController extends Controller
         $blockedSlots = BlockedSlot::whereBetween('date', [$startDate, $endDate])
             ->orderBy('date')
             ->get()
-            ->map(fn (BlockedSlot $blocked) => [
-                'id' => 'block-'.$blocked->id,
-                'title' => $blocked->reason ?: 'Barber on leave',
-                'start' => $blocked->date->toDateString(),
-                'allDay' => true,
-                'color' => '#3f3f46',
-                'textColor' => '#f4f4f5',
-                'extendedProps' => [
-                    'blocked' => true,
-                    'reason' => $blocked->reason,
-                ],
-            ]);
+            ->map(function (BlockedSlot $blocked) {
+                $date = $blocked->date->toDateString();
+                $startTime = $blocked->start_time ? substr($blocked->start_time, 0, 5) : null;
+                $endTime = $blocked->end_time ? substr($blocked->end_time, 0, 5) : null;
+                $fullDay = $blocked->isFullDay();
+
+                return [
+                    'id' => 'block-'.$blocked->id,
+                    'title' => $blocked->reason ?: 'Barber on leave',
+                    'start' => $fullDay ? $date : $date.'T'.$startTime,
+                    'end' => $fullDay ? null : $date.'T'.$endTime,
+                    'allDay' => $fullDay,
+                    'color' => '#3f3f46',
+                    'textColor' => '#f4f4f5',
+                    'extendedProps' => [
+                        'blocked' => true,
+                        'blockId' => $blocked->id,
+                        'reason' => $blocked->reason,
+                        'date' => $date,
+                        'startTime' => $startTime,
+                        'endTime' => $endTime,
+                    ],
+                ];
+            });
 
         return response()->json($bookings->concat($blockedSlots));
     }

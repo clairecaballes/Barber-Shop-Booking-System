@@ -74,26 +74,37 @@
                             <td data-label="Actions" class="sm:px-4 sm:py-3">
                                 <div class="flex items-center justify-end gap-1" x-data="{ open: false }">
                                     <a href="{{ route('bookings.show', $booking) }}"
-                                       class="rounded-[0.55rem] px-2 py-1 text-xs font-medium text-muted transition-colors hover:bg-accent-soft hover:text-ink">View</a>
+                                       class="rounded-[0.55rem] px-2 py-1 text-xs font-medium text-muted transition-all duration-200 hover:bg-accent-soft hover:text-ink">View</a>
                                     <a href="{{ route('bookings.edit', $booking) }}"
-                                       class="rounded-[0.55rem] px-2 py-1 text-xs font-medium text-muted transition-colors hover:bg-accent-soft hover:text-ink">Edit</a>
+                                       class="rounded-[0.55rem] px-2 py-1 text-xs font-medium text-muted transition-all duration-200 hover:bg-accent-soft hover:text-ink">Edit</a>
+
+                                    {{-- Delete the booked schedule. Deleting also removes it from the calendar feed. --}}
+                                    <form method="POST" action="{{ route('bookings.destroy', $booking) }}"
+                                          onsubmit="return confirm('Delete this booking? This cannot be undone.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" title="Delete booking" aria-label="Delete booking for {{ $booking->customer->name ?? 'Walk-in' }}"
+                                                class="flex h-7 w-7 items-center justify-center rounded-[0.55rem] border border-line text-muted transition-all duration-200 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-500">
+                                            <x-icon name="trash" class="h-4 w-4" />
+                                        </button>
+                                    </form>
 
                                     <div class="relative">
                                         <button type="button" @click="open = !open" title="Update status" aria-label="Update status"
-                                                class="flex h-7 w-7 items-center justify-center rounded-[0.55rem] border border-line text-muted transition-colors hover:border-accent-line hover:text-ink">
+                                                class="flex h-7 w-7 items-center justify-center rounded-[0.55rem] border border-line text-muted transition-all duration-200 hover:border-accent-line hover:text-ink">
                                             <x-icon name="dots" class="h-4 w-4" />
                                         </button>
 
                                         <div x-show="open" x-cloak @click.outside="open = false"
-                                             class="bento absolute right-0 z-10 mt-1 w-40 overflow-hidden p-1.5">
+                                             class="bento glass absolute right-0 z-10 mt-1 w-40 overflow-hidden p-1.5">
                                             @foreach (['booked' => 'Booked', 'pending' => 'Pending', 'completed' => 'Complete', 'cancelled' => 'Cancel', 'no_show' => 'No-show'] as $value => $label)
                                                 <form method="POST" action="{{ route('bookings.status', $booking) }}">
                                                     @csrf
                                                     @method('PATCH')
                                                     <input type="hidden" name="status" value="{{ $value }}">
                                                     <button type="submit"
-                                                            class="flex w-full items-center gap-2 rounded-[0.55rem] px-3 py-1.5 text-left text-xs text-muted transition-colors hover:bg-accent-soft hover:text-ink">
-                                                        <span class="h-1.5 w-1.5 rounded-full" style="background-color: var(--st-{{ $value === 'no_show' ? 'noshow' : $value }});"></span>
+                                                            class="flex w-full items-center gap-2 rounded-[0.55rem] px-3 py-1.5 text-left text-xs text-muted transition-all duration-200 hover:bg-accent-soft hover:text-ink">
+                                                        <span class="h-1.5 w-1.5 rounded-full" style="background-color: var(--st-{{ $value === 'no_show' ? 'noshow' : $value }}); box-shadow: 0 0 8px var(--st-{{ $value === 'no_show' ? 'noshow' : $value }});"></span>
                                                         {{ $label }}
                                                     </button>
                                                 </form>

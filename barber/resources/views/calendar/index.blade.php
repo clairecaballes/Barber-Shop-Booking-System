@@ -10,23 +10,27 @@
 
     {{-- Toast --}}
     <div x-show="toast" x-transition.opacity.duration.300ms x-cloak
-         class="fixed left-1/2 top-4 z-[60] -translate-x-1/2 rounded-[0.75rem] px-5 py-3 text-sm font-semibold shadow-lg"
-         style="display:none; background-color: var(--accent); color: var(--accent-ink);">
+         class="glass fixed left-1/2 top-4 z-[60] flex -translate-x-1/2 items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold shadow-lg"
+         style="display:none; border:1px solid var(--accent-line); color: var(--accent);">
+        <span class="h-2 w-2 rounded-full" style="background-color: var(--accent); box-shadow: 0 0 10px var(--accent);"></span>
         <span x-text="toast"></span>
     </div>
 
     {{-- Controls --}}
-    <div class="mb-5 flex flex-wrap items-center justify-between gap-4">
-        <div class="flex items-center gap-2">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3">
             <label for="calendar-month-picker" class="sr-only">Choose month</label>
             <input id="calendar-month-picker" type="month" x-model="monthPicker" @change="changeMonth($event.target.value)"
                    class="calendar-month-control">
 
-            <x-btn variant="ghost" @click="calendar.today()" class="ml-1">Today</x-btn>
+            <x-btn variant="ghost" @click="calendar.today()" class="border border-line bg-surface/60">
+                <x-icon name="calendar" class="h-4 w-4" />
+                Today
+            </x-btn>
         </div>
 
-        <div class="flex items-center gap-2">
-            <div class="chrome flex items-center gap-1 rounded-[0.75rem] border border-white/10 p-1">
+        <div class="flex items-center gap-2.5">
+            <div class="chrome chrome-sheen flex items-center gap-1 rounded-[0.85rem] border border-white/10 p-1.5 shadow-lg">
                 @foreach (['dayGridMonth' => 'Month', 'timeGridWeek' => 'Week', 'timeGridDay' => 'Day'] as $view => $label)
                     <button @click="changeView('{{ $view }}')"
                             :class="currentView === '{{ $view }}' ? 'is-active' : ''"
@@ -41,78 +45,163 @@
         </div>
     </div>
 
-    {{-- Day key --}}
-    <div class="mb-4 flex flex-wrap items-center gap-4 text-xs text-muted">
+    {{-- Day key: frosted chips so the legend reads as part of the board. --}}
+    <div class="bento glass mb-5 inline-flex flex-wrap items-center gap-1 rounded-full px-4 py-2.5 text-xs text-muted">
         @foreach (['pending' => 'Pending', 'booked' => 'Booked', 'completed' => 'Completed', 'cancelled' => 'Cancelled', 'no_show' => 'No-shows'] as $key => $label)
-            <span class="flex items-center gap-1.5">
-                <span class="h-2 w-2 rounded-full" style="background-color: var(--st-{{ $key === 'no_show' ? 'noshow' : $key }});"></span>
+            <span class="chip !border-transparent">
+                <span class="h-2 w-2 rounded-full" style="background-color: var(--st-{{ $key === 'no_show' ? 'noshow' : $key }}); box-shadow: 0 0 8px var(--st-{{ $key === 'no_show' ? 'noshow' : $key }});"></span>
                 {{ $label }}
             </span>
         @endforeach
-        <span class="flex items-center gap-1.5">
-            <span class="h-2 w-2 rounded-full" style="background-color: var(--st-blocked);"></span>
+        <span class="chip !border-transparent">
+            <span class="h-2 w-2 rounded-full" style="background-color: var(--st-blocked); box-shadow: 0 0 8px var(--st-blocked);"></span>
             Blocked
         </span>
     </div>
 
     {{-- Board --}}
-    <x-panel bodyClass="p-4">
-        <div id="calendar-wrapper" class="h-[calc(100svh-15rem)] lg:h-[42rem]">
+    <x-panel bodyClass="p-3 sm:p-4" class="bento-raised">
+        <div id="calendar-wrapper" class="h-[calc(100svh-16rem)] lg:h-[42rem]">
             <div id="calendar"></div>
         </div>
     </x-panel>
 
     {{-- Booking detail --}}
-    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="showModal = false"></div>
+    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;"
+         @keydown.escape.window="showModal = false">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" @click="showModal = false"></div>
 
-        <div class="bento relative w-full max-w-md p-6">
+        <div class="bento bento-accent-edge glass-lite modal-card relative flex w-full max-w-md flex-col overflow-y-auto overscroll-contain p-6">
             <div class="flex items-start justify-between gap-4">
                 <h3 class="text-base font-semibold text-ink" x-text="selectedBooking?.title"></h3>
                 <button type="button" @click="showModal = false" aria-label="Close booking details"
-                        class="flex h-8 w-8 items-center justify-center rounded-[0.65rem] border border-line text-muted transition-colors hover:border-accent-line hover:text-ink">
+                        class="flex h-8 w-8 items-center justify-center rounded-[0.65rem] border border-line text-muted transition-all duration-200 hover:border-accent-line hover:text-ink">
                     <x-icon name="close" class="h-4 w-4" />
                 </button>
             </div>
 
-            <dl class="mt-5 space-y-3 text-sm">
-                <div class="flex justify-between gap-4">
-                    <dt class="text-muted">Customer</dt>
-                    <dd class="font-medium text-ink" x-text="selectedBooking?.extendedProps?.customerName"></dd>
-                </div>
-                <div class="flex justify-between gap-4">
-                    <dt class="text-muted">Service</dt>
-                    <dd class="font-medium text-ink" x-text="selectedBooking?.extendedProps?.serviceName"></dd>
-                </div>
-                <div class="flex justify-between gap-4">
-                    <dt class="text-muted">Status</dt>
-                    <dd class="font-medium text-ink" x-text="selectedBooking?.extendedProps?.status"></dd>
-                </div>
-                <div class="flex justify-between gap-4">
-                    <dt class="text-muted">Price</dt>
-                    <dd class="numeral font-semibold text-ink" x-text="formatMoney(selectedBooking?.extendedProps?.price)"></dd>
-                </div>
-            </dl>
+            {{-- On-leave day: the full window and the reason. --}}
+            <template x-if="selectedBooking?.extendedProps?.blocked">
+                <dl class="mt-5 space-y-3 rounded-tile border border-line bg-surface/40 p-4 text-sm">
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-muted">Date</dt>
+                        <dd class="font-medium text-ink" x-text="formatDate(selectedBooking?.extendedProps?.date)"></dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-muted">Leave starts</dt>
+                        <dd class="numeral font-semibold text-ink" x-text="formatWindowStart()"></dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-muted">Leave ends</dt>
+                        <dd class="numeral font-semibold text-ink" x-text="formatWindowEnd()"></dd>
+                    </div>
+                    <template x-if="selectedBooking?.extendedProps?.reason">
+                        <div class="flex justify-between gap-4">
+                            <dt class="text-muted">Reason</dt>
+                            <dd class="font-medium text-ink" x-text="selectedBooking?.extendedProps?.reason"></dd>
+                        </div>
+                    </template>
+                </dl>
+            </template>
 
-            <div class="mt-6 flex justify-end gap-2 border-t border-line pt-5">
-                <x-btn variant="ghost" @click="openBooking()">Open booking</x-btn>
+            {{-- Regular booking detail. --}}
+            <template x-if="!selectedBooking?.extendedProps?.blocked">
+                <dl class="mt-5 space-y-3 rounded-tile border border-line bg-surface/40 p-4 text-sm">
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-muted">Customer</dt>
+                        <dd class="font-medium text-ink" x-text="selectedBooking?.extendedProps?.customerName"></dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-muted">Service</dt>
+                        <dd class="font-medium text-ink" x-text="selectedBooking?.extendedProps?.serviceName"></dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-muted">Status</dt>
+                        <dd class="uppercase font-medium tracking-wide" x-text="selectedBooking?.extendedProps?.status"></dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-muted">Price</dt>
+                        <dd class="numeral font-semibold text-ink" x-text="formatMoney(selectedBooking?.extendedProps?.price)"></dd>
+                    </div>
+                </dl>
+            </template>
+
+            <div class="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-line pt-5">
+                <template x-if="selectedBooking?.extendedProps?.blocked">
+                    <div class="flex w-full flex-wrap items-center justify-end gap-2">
+                        <x-btn variant="metal" @click="editLeave()">Edit time</x-btn>
+                        <x-btn variant="danger" @click="cancelLeave()" x-bind:disabled="saving">
+                            <span x-show="!saving">Cancel leave</span>
+                            <span x-show="saving">Cancelling…</span>
+                        </x-btn>
+                    </div>
+                </template>
+                <template x-if="!selectedBooking?.extendedProps?.blocked">
+                    <x-btn variant="danger" @click="deleteBooking()" x-bind:disabled="saving">
+                        <x-icon name="trash" class="h-4 w-4" />
+                        <span x-text="saving ? 'Deleting…' : 'Delete'"></span>
+                    </x-btn>
+                    <x-btn variant="ghost" @click="openBooking()">Open booking</x-btn>
+                </template>
             </div>
+        </div>
+    </div>
+
+    {{-- Edit leave window --}}
+    <div x-show="showEditLeaveModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;"
+         @keydown.escape.window="closeEditLeave()">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" @click="closeEditLeave()"></div>
+
+        <div class="bento bento-accent-edge glass-lite modal-card relative flex w-full max-w-md flex-col overflow-y-auto overscroll-contain p-6">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="text-base font-semibold text-ink">Edit barber leave</h3>
+                    <p class="mt-1 text-sm text-muted" x-text="formatDate(editLeaveDate)"></p>
+                </div>
+                <button type="button" @click="closeEditLeave()" aria-label="Close edit leave"
+                        class="flex h-8 w-8 items-center justify-center rounded-[0.65rem] border border-line text-muted transition-all duration-200 hover:border-accent-line hover:text-ink">
+                    <x-icon name="close" class="h-4 w-4" />
+                </button>
+            </div>
+
+            <form @submit.prevent="saveLeaveEdit()" class="mt-5 space-y-4">
+                @csrf
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <x-field label="Leave from" for="edit_leave_start">
+                        <x-input id="edit_leave_start" type="time" x-model="editLeaveStart" />
+                    </x-field>
+                    <x-field label="Leave until" for="edit_leave_end" hint="Blank times use the day's opening hours.">
+                        <x-input id="edit_leave_end" type="time" x-model="editLeaveEnd" />
+                    </x-field>
+                </div>
+
+                <p x-show="editLeaveError" x-text="editLeaveError" class="text-xs font-medium text-red-500"></p>
+
+                <div class="flex flex-wrap justify-end gap-2 border-t border-line pt-5">
+                    <x-btn variant="ghost" type="button" @click="closeEditLeave()">Cancel</x-btn>
+                    <x-btn variant="accent" type="submit" x-bind:disabled="saving">
+                        <span x-show="!saving">Save leave</span>
+                        <span x-show="saving">Saving…</span>
+                    </x-btn>
+                </div>
+            </form>
         </div>
     </div>
 
     {{-- Reschedule --}}
     <div x-show="showRescheduleModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;"
          @keydown.escape.window="closeReschedule()">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="closeReschedule()"></div>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" @click="closeReschedule()"></div>
 
-        <div class="bento relative w-full max-w-md p-6">
+        <div class="bento bento-accent-edge glass-lite modal-card relative flex w-full max-w-md flex-col overflow-y-auto overscroll-contain p-6">
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h3 class="text-base font-semibold text-ink">Reschedule booking</h3>
                     <p class="mt-1 text-sm text-muted" x-text="selectedBooking?.extendedProps?.customerName"></p>
                 </div>
                 <button type="button" @click="closeReschedule()" aria-label="Close reschedule"
-                        class="flex h-8 w-8 items-center justify-center rounded-[0.65rem] border border-line text-muted transition-colors hover:border-accent-line hover:text-ink">
+                        class="flex h-8 w-8 items-center justify-center rounded-[0.65rem] border border-line text-muted transition-all duration-200 hover:border-accent-line hover:text-ink">
                     <x-icon name="close" class="h-4 w-4" />
                 </button>
             </div>
@@ -150,16 +239,16 @@
 
     {{-- Quick book --}}
     <div x-show="showBookModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none;">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="showBookModal = false"></div>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" @click="showBookModal = false"></div>
 
-        <div class="bento relative w-full max-w-md p-6">
+        <div class="bento bento-accent-edge glass-lite modal-card relative flex w-full max-w-md flex-col overflow-y-auto overscroll-contain p-6">
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h3 class="text-base font-semibold text-ink">Quick book</h3>
                     <p class="numeral mt-1 text-xs text-muted" x-text="bookDate"></p>
                 </div>
                 <button type="button" @click="showBookModal = false" aria-label="Close"
-                        class="text-muted transition-colors hover:text-ink">
+                        class="flex h-8 w-8 items-center justify-center rounded-[0.65rem] border border-line text-muted transition-all duration-200 hover:border-accent-line hover:text-ink">
                     <x-icon name="close" class="h-4 w-4" />
                 </button>
             </div>
@@ -195,21 +284,54 @@
 
                 <p x-show="quickError" x-text="quickError" class="text-xs font-medium text-red-500"></p>
 
-                <div class="grid grid-cols-3 gap-2 border-t border-line pt-5 sm:flex sm:justify-end sm:gap-2">
-                    <x-btn variant="ghost" type="button" @click="showBookModal = false" class="w-full px-0 text-center">Cancel</x-btn>
-                    <x-btn variant="danger" type="button" @click="submitBlock()" x-bind:disabled="saving" class="w-full px-0 text-center">
-                        <span x-show="!saving">
-                            <span class="sm:hidden">Block</span>
-                            <span class="hidden sm:inline">Block the day</span>
-                        </span>
-                        <span x-show="saving">Saving…</span>
-                    </x-btn>
-                    <x-btn variant="accent" type="submit" x-bind:disabled="saving" class="w-full px-0 text-center">
-                        <span x-show="!saving">
+                <div class="grid grid-cols-2 gap-2 border-t border-line pt-5 sm:flex sm:justify-end sm:gap-2">
+                    <x-btn variant="ghost" type="button" @click="showBookModal = false" class="w-full sm:w-auto">Cancel</x-btn>
+                    <x-btn variant="accent" type="submit" x-bind:disabled="saving" class="w-full sm:w-auto">
+                        <span x-show="!saving" class="inline-flex items-center gap-1.5">
+                            <x-icon name="plus" class="h-4 w-4" />
                             <span class="sm:hidden">Add</span>
                             <span class="hidden sm:inline">Add to calendar</span>
                         </span>
-                        <span x-show="saving">Saving…</span>
+                        <span x-show="saving" class="inline-flex items-center gap-1.5">
+                            <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M22 12a10 10 0 0 1-10 10" stroke-linecap="round"/></svg>
+                            Saving…
+                        </span>
+                    </x-btn>
+                </div>
+            </form>
+
+            {{-- Its own form so blocking the day never requires the booking fields above. --}}
+            <form @submit.prevent="submitBlock()" class="mt-5 space-y-4 border-t border-line pt-5">
+                @csrf
+                <input type="hidden" name="date" x-bind:value="bookDate">
+
+                <div>
+                    <p class="text-xs font-semibold text-ink">Barber on leave</p>
+                    <p class="mt-1 text-xs text-muted">Set the window the barber is away, then block the day. Blank times use the day's opening hours.</p>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <x-field label="Leave from" for="block_start">
+                        <x-input id="block_start" type="time" x-model="blockStart" />
+                    </x-field>
+                    <x-field label="Leave until" for="block_end">
+                        <x-input id="block_end" type="time" x-model="blockEnd" />
+                    </x-field>
+                </div>
+
+                <p x-show="blockError" x-text="blockError" class="text-xs font-medium text-red-500"></p>
+
+                <div class="flex justify-end">
+                    <x-btn variant="danger" type="submit" x-bind:disabled="saving" class="sm:ml-auto">
+                        <span x-show="!saving" class="inline-flex items-center gap-1.5">
+                            <x-icon name="clock" class="h-4 w-4" />
+                            <span class="sm:hidden">Block</span>
+                            <span class="hidden sm:inline">Block the day</span>
+                        </span>
+                        <span x-show="saving" class="inline-flex items-center gap-1.5">
+                            <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M22 12a10 10 0 0 1-10 10" stroke-linecap="round"/></svg>
+                            Saving…
+                        </span>
                     </x-btn>
                 </div>
             </form>
@@ -227,6 +349,12 @@ document.addEventListener('alpine:init', () => {
         calendarTitle: '',
         showModal: false,
         selectedBooking: null,
+        showEditLeaveModal: false,
+        editLeaveBlockId: '',
+        editLeaveDate: '',
+        editLeaveStart: '',
+        editLeaveEnd: '',
+        editLeaveError: '',
         showRescheduleModal: false,
         rescheduleDate: '',
         rescheduleTime: '',
@@ -239,9 +367,12 @@ document.addEventListener('alpine:init', () => {
         customerId: '',
         customerName: '',
         bookTime: '',
+        blockStart: '',
+        blockEnd: '',
         monthPicker: '',
         saving: false,
         quickError: '',
+        blockError: '',
         toast: '',
 
         init() {
@@ -270,10 +401,13 @@ document.addEventListener('alpine:init', () => {
                 }],
                 dateClick(info) {
                     self.quickError = '';
+                    self.blockError = '';
                     self.bookDate = info.dateStr.split('T')[0];
                     self.customerId = '';
                     self.customerName = '';
                     self.bookTime = '';
+                    self.blockStart = '';
+                    self.blockEnd = '';
                     self.bookServiceId = @json(\App\Models\Service::where('active', true)->value('id')) ?? '';
                     self.showBookModal = true;
                     self.loadSlots();
@@ -316,6 +450,159 @@ document.addEventListener('alpine:init', () => {
             const id = this.selectedBooking?.id;
             if (!id) return;
             window.location.href = '/bookings/' + id;
+        },
+
+        // --- Leave window ---------------------------------------------------
+
+        editLeave() {
+            const booking = this.selectedBooking;
+            if (!booking) return;
+            const props = booking.extendedProps || {};
+
+            this.editLeaveBlockId = props.blockId;
+            this.editLeaveDate = props.date;
+            this.editLeaveStart = props.startTime || '';
+            this.editLeaveEnd = props.endTime || '';
+            this.editLeaveError = '';
+            this.showModal = false;
+            this.showEditLeaveModal = true;
+        },
+
+        closeEditLeave() {
+            this.showEditLeaveModal = false;
+            this.editLeaveError = '';
+        },
+
+        async saveLeaveEdit() {
+            this.editLeaveError = '';
+            if (!this.editLeaveBlockId) return;
+
+            if (this.editLeaveStart && this.editLeaveEnd && this.editLeaveEnd <= this.editLeaveStart) {
+                this.editLeaveError = 'The leave end time must be after the start time.';
+                return;
+            }
+
+            this.saving = true;
+            try {
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}');
+                if (this.editLeaveStart) formData.append('start_time', this.editLeaveStart);
+                if (this.editLeaveEnd) formData.append('end_time', this.editLeaveEnd);
+
+                const res = await fetch(`{{ url('calendar/blocked-slots') }}/${this.editLeaveBlockId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    this.editLeaveError = data.message || 'Could not update this leave.';
+                    return;
+                }
+
+                this.showEditLeaveModal = false;
+                this.toast = data.message || 'Leave updated.';
+                this.calendar.refetchEvents();
+                setTimeout(() => { this.toast = ''; }, 3500);
+            } catch (e) {
+                this.editLeaveError = 'Something went wrong. Please try again.';
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        formatWindowStart() {
+            const props = this.selectedBooking?.extendedProps || {};
+            if (!props.startTime) return 'All day';
+            return this.formatTime(props.startTime);
+        },
+
+        formatWindowEnd() {
+            const props = this.selectedBooking?.extendedProps || {};
+            if (!props.endTime) return 'All day';
+            return this.formatTime(props.endTime);
+        },
+
+        async cancelLeave() {
+            const blockId = this.selectedBooking?.extendedProps?.blockId;
+            if (!blockId) return;
+
+            this.saving = true;
+            try {
+                const res = await fetch(`{{ url('calendar/blocked-slots') }}/${blockId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    this.toast = data.message || 'Could not cancel this leave.';
+                    return;
+                }
+
+                this.showModal = false;
+                this.toast = data.message || 'Leave cancelled.';
+                this.calendar.refetchEvents();
+                setTimeout(() => { this.toast = ''; }, 3500);
+            } catch (e) {
+                this.toast = 'Something went wrong. Please try again.';
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        // --- Booking actions ------------------------------------------------
+
+        async deleteBooking() {
+            const booking = this.selectedBooking;
+            if (!booking) return;
+            if (!window.confirm('Delete this booking? This cannot be undone.')) return;
+
+            this.saving = true;
+            try {
+                const res = await fetch(`{{ url('bookings') }}/${booking.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    this.toast = data.message || 'Could not delete this booking.';
+                    return;
+                }
+
+                this.showModal = false;
+                this.toast = data.message || 'Booking deleted.';
+                this.calendar.refetchEvents();
+                setTimeout(() => { this.toast = ''; }, 3500);
+            } catch (e) {
+                this.toast = 'Something went wrong. Please try again.';
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        formatDate(value) {
+            if (!value) return '';
+            const d = new Date(String(value).slice(0, 10) + 'T00:00:00');
+            if (isNaN(d)) return value;
+            return d.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         },
 
         rescheduleBooking() {
@@ -501,7 +788,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         async submitBlock() {
-            this.quickError = '';
+            this.blockError = '';
             if (!this.bookDate) return;
 
             this.saving = true;
@@ -509,6 +796,8 @@ document.addEventListener('alpine:init', () => {
                 const formData = new FormData();
                 formData.append('_token', '{{ csrf_token() }}');
                 formData.append('date', this.bookDate);
+                if (this.blockStart) formData.append('start_time', this.blockStart);
+                if (this.blockEnd) formData.append('end_time', this.blockEnd);
 
                 const res = await fetch('{{ route('calendar.blocks.store') }}', {
                     method: 'POST',
@@ -519,7 +808,7 @@ document.addEventListener('alpine:init', () => {
                 const data = await res.json().catch(() => ({}));
 
                 if (!res.ok) {
-                    this.quickError = data.message || 'Could not block this day.';
+                    this.blockError = data.message || 'Could not block this day.';
                     return;
                 }
 
@@ -528,7 +817,7 @@ document.addEventListener('alpine:init', () => {
                 this.calendar.refetchEvents();
                 setTimeout(() => { this.toast = ''; }, 3500);
             } catch (e) {
-                this.quickError = 'Something went wrong. Please try again.';
+                this.blockError = 'Something went wrong. Please try again.';
             } finally {
                 this.saving = false;
             }
@@ -544,10 +833,16 @@ document.addEventListener('alpine:init', () => {
             const el = document.getElementById('calendar-wrapper');
             if (!el || !window.html2canvas) return;
 
+            // Print from today to the last day of the month: hide past days and
+            // days that spill over from the previous/next month.
+            const hideStyle = document.createElement('style');
+            hideStyle.textContent = '#calendar-wrapper .fc-day-past, #calendar-wrapper .fc-day-other { visibility: hidden !important; }';
+            document.head.appendChild(hideStyle);
+
             const dark = document.documentElement.classList.contains('dark');
-            const sheet = dark ? '#121212' : '#f4f4f5';
-            const ink = dark ? '#f4f4f5' : '#18181b';
-            const muted = dark ? '#a1a1aa' : '#52525b';
+            const sheet = dark ? '#0b0c0f' : '#f2f3f5';
+            const ink = dark ? '#f5f5f7' : '#16181d';
+            const muted = dark ? '#9ca3af' : '#5f6672';
 
             const shopName = '{{ \App\Models\BusinessSetting::get('shop_name', 'Barber Shop') }}';
             const month = this.calendarTitle || this.currentMonthLabel();
@@ -567,6 +862,7 @@ document.addEventListener('alpine:init', () => {
                 link.click();
             } finally {
                 header.remove();
+                hideStyle.remove();
             }
         },
 
@@ -574,12 +870,12 @@ document.addEventListener('alpine:init', () => {
             if (!window.html2canvas) return;
 
             const dark = document.documentElement.classList.contains('dark');
-            const sheet = dark ? '#121212' : '#f4f4f5';
-            const ink = dark ? '#f4f4f5' : '#18181b';
-            const muted = dark ? '#a1a1aa' : '#52525b';
+            const sheet = dark ? '#0b0c0f' : '#f2f3f5';
+            const ink = dark ? '#f5f5f7' : '#16181d';
+            const muted = dark ? '#9ca3af' : '#5f6672';
             const line = dark ? '#2e2e33' : '#dcdcdf';
             const accent = dark ? '#ccff00' : '#4d7c0f';
-            const danger = dark ? '#ff6b6b' : '#b91c1c';
+            const danger = dark ? '#f47f7f' : '#b91c1c';
 
             const shopName = '{{ \App\Models\BusinessSetting::get('shop_name', 'Barber Shop') }}';
             const monthMatch = (this.calendarTitle || '').match(/^([A-Za-z]+)\s+\d{4}$/);
@@ -600,8 +896,13 @@ document.addEventListener('alpine:init', () => {
                 });
             });
 
+            // Only print from today up to the last day of the displayed month.
+            const todayKey = this.padDate(new Date());
+            const viewDate = this.calendar?.getDate ? this.calendar.getDate() : new Date();
+            const lastKey = this.padDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0));
+
             let listHtml = '';
-            Object.keys(byDay).sort().forEach(key => {
+            Object.keys(byDay).sort().filter(key => key >= todayKey && key <= lastKey).forEach(key => {
                 const entries = byDay[key].sort((a, b) => (a.block ? 0 : 1) - (b.block ? 0 : 1) || a.time.localeCompare(b.time));
                 const d = new Date(key + 'T00:00:00');
                 const dayLabel = d.toLocaleString('en-US', { month: 'long', day: 'numeric' });

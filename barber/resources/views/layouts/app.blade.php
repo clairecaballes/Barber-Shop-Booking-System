@@ -72,7 +72,7 @@
     <div class="flex min-w-0 flex-1 flex-col">
 
         {{-- Topbar --}}
-        <header class="sticky top-0 z-20 border-b border-line bg-page/80 backdrop-blur-xl">
+        <header class="sticky top-0 z-20 border-b border-line bg-page/70 backdrop-blur-2xl shadow-sm">
             <div class="flex items-center justify-between gap-3 px-4 py-3 lg:px-8">
                 <div class="flex min-w-0 items-center gap-3">
                     <button type="button" @click="sidebarOpen = true" aria-label="Open menu"

@@ -131,9 +131,13 @@ class BookingController extends Controller
         return back()->with('status', 'Booking rescheduled.');
     }
 
-    public function destroy(Booking $booking): RedirectResponse
+    public function destroy(Request $request, Booking $booking): JsonResponse|RedirectResponse
     {
         $booking->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Booking deleted.']);
+        }
 
         return redirect()->route('bookings.index')->with('status', 'Booking deleted.');
     }

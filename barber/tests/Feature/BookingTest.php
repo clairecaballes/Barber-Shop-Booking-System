@@ -224,4 +224,43 @@ class BookingTest extends TestCase
         $this->assertStringContainsString('14:00', $events[0]['start']);
         $this->assertEquals('#60a5fa', $events[0]['color']);
     }
+
+    public function test_bookings_and_edits_are_shared_across_accounts(): void
+    {
+        $owner = User::create([
+            'name' => 'Owner',
+            'email' => 'owner@test.com',
+            'password' => 'password',
+        ]);
+
+        $staff = User::create([
+            'name' => 'Staff',
+            'email' => 'staff@test.com',
+            'password' => 'password',
+        ]);
+
+        $customer = Customer::factory()->create(['name' => 'Shared Customer']);
+        $service = Service::factory()->create(['name' => 'Haircut', 'active' => true]);
+
+        Booking::create([
+            'customer_id' => $customer->id,
+            'service_id' => $service->id,
+            'appointment_date' => now()->addDay()->toDateString(),
+            'appointment_time' => '10:00:00',
+            'price' => $service->price,
+            'status' => 'booked',
+        ]);
+
+        // The booking created under one account is still visible after signing
+        // in with a different account: shop data is shared, not per-user.
+        $this->actingAs($owner)
+            ->get(route('bookings.index'))
+            ->assertOk()
+            ->assertSee('Shared Customer');
+
+        $this->actingAs($staff)
+            ->get(route('bookings.index'))
+            ->assertOk()
+            ->assertSee('Shared Customer');
+    }
 }

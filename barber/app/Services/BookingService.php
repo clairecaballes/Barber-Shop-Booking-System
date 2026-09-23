@@ -17,15 +17,15 @@ class BookingService
      */
     public function isSlotAvailable(string $date, string $time, int $serviceId, ?int $excludeBookingId = null): bool
     {
-        if (BlockedSlot::where('date', $date)->exists()) {
-            return false;
-        }
-
         $service = Service::findOrFail($serviceId);
         $duration = $service->duration;
 
         $start = Carbon::parse("{$date} {$time}");
         $end = $start->copy()->addMinutes($duration);
+
+        if ($this->isBlocked($date, $start, $end)) {
+            return false;
+        }
 
         // Load active bookings for the date with their services, so we can
         // compute each existing booking's end time in PHP (DB-agnostic).
@@ -51,10 +51,6 @@ class BookingService
      */
     public function getAvailableSlots(string $date, int $serviceId): array
     {
-        if (BlockedSlot::where('date', $date)->exists()) {
-            return [];
-        }
-
         $service = Service::findOrFail($serviceId);
         $duration = $service->duration;
 
@@ -87,6 +83,10 @@ class BookingService
             $slotStart = Carbon::parse("{$date} {$slot}");
             $slotEnd = $slotStart->copy()->addMinutes($duration);
 
+            if ($this->isBlocked($date, $slotStart, $slotEnd)) {
+                continue;
+            }
+
             $conflicts = $activeBookings->contains(function (Booking $booking) use ($slotStart, $slotEnd) {
                 $bStart = Carbon::parse("{$booking->appointment_date->toDateString()} {$booking->appointment_time}");
                 $bService = $booking->service;
@@ -108,7 +108,9 @@ class BookingService
      */
     public function isWorkingDay(string $date): bool
     {
-        if (BlockedSlot::where('date', $date)->exists()) {
+        // A partial-day leave still counts as a working day; only a full-day
+        // block (no window) takes the whole day off the schedule.
+        if (BlockedSlot::where('date', $date)->whereNull('start_time')->exists()) {
             return false;
         }
 
@@ -159,5 +161,22 @@ class BookingService
         $booking->update(['status' => $status]);
 
         return $booking->fresh();
+    }
+
+    /**
+     * Whether any leave block on the date overlaps the given time window.
+     */
+    private function isBlocked(string $date, Carbon $start, Carbon $end): bool
+    {
+        return BlockedSlot::where('date', $date)->get()->contains(function (BlockedSlot $block) use ($date, $start, $end) {
+            if ($block->isFullDay()) {
+                return true;
+            }
+
+            $blockStart = Carbon::parse("{$date} {$block->start_time}");
+            $blockEnd = Carbon::parse("{$date} {$block->end_time}");
+
+            return $start->lt($blockEnd) && $end->gt($blockStart);
+        });
     }
 }
