@@ -24,8 +24,8 @@
     {{-- The sign: a long chrome door with the spinning pole. On phones it fills
          the whole first screen; the desk form waits below, one scroll away. --}}
     <div class="chrome chrome-sheen relative flex min-h-[100svh] flex-col justify-between gap-5 overflow-hidden p-6 sm:min-h-0 sm:gap-0 sm:p-8 lg:gap-0">
-        <div class="flex items-center justify-between gap-4 lg:block">
-            <div class="relative min-w-0">
+        <div class="flex items-center justify-center gap-4 lg:block">
+            <div class="relative min-w-0 text-center">
                 <p class="text-[11px] text-rail-muted">Shop desk</p>
                 <h1 class="wordmark-name mt-2 text-xl sm:text-2xl">{{ $shopName }}</h1>
                 <div class="wordmark-rule" aria-hidden="true">
