@@ -850,14 +850,16 @@ document.addEventListener('alpine:init', () => {
             const frameW = el.offsetWidth + pad * 2;
             const frameH = Math.ceil(el.offsetHeight + 190);
 
-            const canvas = await window.html2canvas(el, {
-                backgroundColor: sheet,
-                scale: 2,
-                width: frameW,
-                height: frameH,
-                windowWidth: frameW,
-                windowHeight: frameH,
-                onclone: (doc, target) => {
+            try {
+                this.toast = 'Preparing your schedule\u2026';
+                const canvas = await window.html2canvas(el, {
+                    backgroundColor: sheet,
+                    scale: 2,
+                    width: frameW,
+                    height: frameH,
+                    windowWidth: frameW,
+                    windowHeight: frameH,
+                    onclone: (doc, target) => {
                     const style = doc.createElement('style');
                     style.textContent = '#calendar-wrapper .fc-day-past, #calendar-wrapper .fc-day-other { visibility: hidden !important; }';
                     doc.head.appendChild(style);
@@ -895,12 +897,18 @@ document.addEventListener('alpine:init', () => {
                     host.insertBefore(frame, target);
                     frame.querySelector('[data-grid]').appendChild(target);
                 },
-            });
+                });
 
-            const link = document.createElement('a');
-            link.download = shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-schedule-' + month.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+                const link = document.createElement('a');
+                link.download = shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-schedule-' + month.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                this.toast = 'Schedule downloaded.';
+            } catch (e) {
+                this.toast = 'Export failed \u2014 please try again.';
+            } finally {
+                setTimeout(() => { this.toast = ''; }, 3500);
+            }
         },
 
         async downloadScheduleList() {
@@ -981,9 +989,9 @@ document.addEventListener('alpine:init', () => {
                 + '<span style="position:absolute;top:24px;bottom:28px;right:30px;width:1px;background:' + hairlineSoft + ';"></span>';
 
             const node = document.createElement('div');
-            node.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + Math.min(430, window.innerWidth) + 'px;z-index:-1;';
+            node.style.cssText = 'position:fixed;top:0;left:0;width:' + Math.min(430, window.innerWidth) + 'px;z-index:2147483000;';
             node.innerHTML =
-                '<div style="position:relative;box-sizing:border-box;display:flex;flex-direction:column;min-height:820px;font-family:ui-sans-serif,system-ui,sans-serif;background:' + sheet + ';color:' + ink + ';padding:30px 44px 20px;border:1px solid #cfc8b8;border-radius:2px;box-shadow:0 20px 44px rgba(20,20,28,0.12);">'
+                '<div style="position:relative;box-sizing:border-box;display:flex;flex-direction:column;min-height:560px;font-family:ui-sans-serif,system-ui,sans-serif;background:' + sheet + ';color:' + ink + ';padding:30px 44px 20px;border:1px solid #cfc8b8;border-radius:2px;box-shadow:0 20px 44px rgba(20,20,28,0.12);">'
                 + rails
                 + '<div style="text-align:center;padding-top:22px;border-top:1px solid ' + hairline + ';">'
                 + '<h1 style="margin:0;font-family:Georgia,\'Times New Roman\',serif;font-size:29px;line-height:1.15;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:' + ink + ';">' + shopName + '</h1>'
@@ -999,13 +1007,18 @@ document.addEventListener('alpine:init', () => {
             document.body.appendChild(node);
 
             try {
-                const canvas = await window.html2canvas(node, { backgroundColor: sheet, scale: 2 });
+                this.toast = 'Preparing your schedule\u2026';
+                const canvas = await window.html2canvas(node, { backgroundColor: sheet, scale: 3 });
                 const link = document.createElement('a');
                 link.download = shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-schedule-' + monthLabel.toLowerCase() + '.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
+                this.toast = 'Schedule downloaded.';
+            } catch (e) {
+                this.toast = 'Export failed \u2014 please try again.';
             } finally {
                 node.remove();
+                setTimeout(() => { this.toast = ''; }, 3500);
             }
         },
 
