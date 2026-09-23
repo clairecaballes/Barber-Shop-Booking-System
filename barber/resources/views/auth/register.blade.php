@@ -21,9 +21,12 @@
 
 <div class="bento w-full max-w-md overflow-hidden">
     <div class="chrome chrome-sheen flex items-center justify-between gap-4 px-6 py-5">
-        <div>
+        <div class="min-w-0">
             <p class="text-[11px] text-rail-muted">Shop desk</p>
-            <h1 class="mt-0.5 text-lg font-semibold tracking-tight text-rail-ink">{{ $shopName }}</h1>
+            <h1 class="wordmark-name mt-1.5 text-lg">{{ $shopName }}</h1>
+            <div class="wordmark-rule" aria-hidden="true">
+                <x-icon name="scissors" class="h-3 w-3" />
+            </div>
         </div>
         <span class="flex flex-col items-center shrink-0" aria-hidden="true">
             <span class="pole-cap h-1.5 w-7"></span>

@@ -667,6 +667,56 @@
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 4px 12px -6px rgba(0, 0, 0, 0.6);
     }
 
+    /* --- Wordmark ---------------------------------------------------------
+       The shop name on the chrome sign is a machine part, not plain type:
+       brushed-metal letters (a silver gradient clipped to the glyphs) in
+       wide-tracked caps, with a hairline-and-scissors rule beneath like the
+       seam of a folded blade. Lives on the dark rail in both themes.
+    ---------------------------------------------------------------------- */
+    .wordmark-name {
+        display: inline-block;
+        max-width: 100%;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        line-height: 1.1;
+        word-break: break-word;
+        background-image: linear-gradient(
+            180deg,
+            #f8fafb 0%,
+            #d9e0e5 30%,
+            #a0aab2 52%,
+            #f0f3f5 74%,
+            #8f9aa2 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
+
+    .wordmark-rule {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 0.55rem;
+        color: var(--rail-muted);
+    }
+
+    .wordmark-rule::before,
+    .wordmark-rule::after {
+        content: '';
+        flex: 1 1 0;
+        height: 1px;
+        background-image: linear-gradient(90deg, transparent, currentColor 25%, currentColor 75%, transparent);
+        opacity: 0.5;
+    }
+
+    .wordmark-rule svg {
+        flex-shrink: 0;
+        opacity: 0.85;
+    }
+
     /* --- Gauges -----------------------------------------------------------
        Data tiles are read, not just counted: recessed tracks for period
        meters and vertical bars for the seven-day takings chart. Fills are

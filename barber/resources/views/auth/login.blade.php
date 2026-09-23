@@ -25,9 +25,12 @@
          the whole first screen; the desk form waits below, one scroll away. --}}
     <div class="chrome chrome-sheen relative flex min-h-[100svh] flex-col justify-between gap-5 overflow-hidden p-6 sm:min-h-0 sm:gap-0 sm:p-8 lg:gap-0">
         <div class="flex items-center justify-between gap-4 lg:block">
-            <div class="relative">
+            <div class="relative min-w-0">
                 <p class="text-[11px] text-rail-muted">Shop desk</p>
-                <h1 class="mt-1 text-xl font-semibold tracking-tight text-rail-ink sm:text-2xl">{{ $shopName }}</h1>
+                <h1 class="wordmark-name mt-2 text-xl sm:text-2xl">{{ $shopName }}</h1>
+                <div class="wordmark-rule" aria-hidden="true">
+                    <x-icon name="scissors" class="h-3.5 w-3.5" />
+                </div>
             </div>
         </div>
 
