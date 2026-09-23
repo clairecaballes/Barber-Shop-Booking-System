@@ -914,15 +914,17 @@ document.addEventListener('alpine:init', () => {
         async downloadScheduleList() {
             if (!window.html2canvas) return;
 
-            // A printed artifact, independent of the on-screen theme: warm
-            // paper, charcoal ink, olive-lime accents, twin symmetric rails.
-            const sheet = '#f8f6f1';
-            const ink = '#26292f';
-            const muted = '#7b8089';
-            const hairline = '#e7e2d7';
-            const hairlineSoft = 'rgba(38,41,47,0.05)';
-            const accent = '#4d5d18';
-            const danger = '#a04b3e';
+            // A printed artifact: near-black ledger, warm brass rules, a barber-
+            // pole band, and twin symmetric rails. Independent of the on-screen
+            // theme. Height grows with content — only a comfortable minimum.
+            const sheet = '#131519';
+            const sheetTop = '#1d2027';
+            const ink = '#efede8';
+            const muted = '#98a0a9';
+            const hairline = 'rgba(217,184,120,0.20)';
+            const hairlineSoft = 'rgba(217,184,120,0.08)';
+            const accent = '#d9b878';
+            const danger = '#d6846f';
 
             const shopName = '{{ \App\Models\BusinessSetting::get('shop_name', 'Barber Shop') }}';
             const monthMatch = (this.calendarTitle || '').match(/^([A-Za-z]+)\s+(\d{4})$/);
@@ -991,18 +993,18 @@ document.addEventListener('alpine:init', () => {
             const node = document.createElement('div');
             node.style.cssText = 'position:fixed;top:0;left:0;width:' + Math.min(430, window.innerWidth) + 'px;z-index:2147483000;';
             node.innerHTML =
-                '<div style="position:relative;box-sizing:border-box;display:flex;flex-direction:column;min-height:560px;font-family:ui-sans-serif,system-ui,sans-serif;background:' + sheet + ';color:' + ink + ';padding:30px 44px 20px;border:1px solid #cfc8b8;border-radius:2px;box-shadow:0 20px 44px rgba(20,20,28,0.12);">'
+                '<div style="position:relative;box-sizing:border-box;display:flex;flex-direction:column;min-height:560px;font-family:ui-sans-serif,system-ui,sans-serif;background:linear-gradient(180deg,' + sheetTop + ' 0%,' + sheet + ' 100%);color:' + ink + ';padding:34px 46px 22px;border:1px solid rgba(217,184,120,0.40);border-radius:2px;box-shadow:0 26px 54px rgba(0,0,0,0.6);">'
                 + rails
-                + '<div style="text-align:center;padding-top:22px;border-top:1px solid ' + hairline + ';">'
-                + '<h1 style="margin:0;font-family:Georgia,\'Times New Roman\',serif;font-size:29px;line-height:1.15;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:' + ink + ';">' + shopName + '</h1>'
-                + '<p style="margin:9px 0 0;font-size:12px;letter-spacing:0.06em;color:' + muted + ';">Monthly schedule for ' + periodLabel + '</p>'
+                + '<div style="text-align:center;padding-top:18px;border-top:1px solid ' + hairline + ';">'
+                + '<h1 style="margin:0;font-family:Georgia,\'Times New Roman\',serif;font-size:30px;line-height:1.12;font-weight:700;letter-spacing:0.26em;text-transform:uppercase;color:' + ink + ';">' + shopName + '</h1>'
+                + '<p style="margin:11px 0 0;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:' + accent + ';">Monthly schedule for ' + periodLabel + '</p>'
                 + '</div>'
-                + divider
+                + '<div style="height:7px;margin:20px auto 0;width:72%;border-radius:999px;background:linear-gradient(90deg,#a63f2b 0 33%,#e9e2cf 33% 66%,#33407c 66% 100%);opacity:0.92;"></div>'
                 + '<div style="flex:1;">'
-                + (listHtml || '<p style="margin:26px 0 0;text-align:center;font-size:13px;font-style:italic;color:' + muted + ';">No bookings scheduled for this month.</p>')
+                + (listHtml || '<p style="margin:28px 0 0;text-align:center;font-size:13px;font-style:italic;color:' + muted + ';">No bookings scheduled for this month.</p>')
                 + '</div>'
                 + divider
-                + '<div style="text-align:center;padding-top:18px;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:' + muted + ';">OBS \u2014 developed by JCC</div>'
+                + '<div style="text-align:center;padding-top:16px;font-size:9.5px;letter-spacing:0.24em;text-transform:uppercase;color:' + muted + ';">OBS \u2014 developed by JCC</div>'
                 + '</div>';
             document.body.appendChild(node);
 
